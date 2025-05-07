@@ -101,3 +101,23 @@ table_results <- function(model, group = NULL, study_name = "Study_ID", species_
   
   return(cbind(tab, modelvals))
 }
+
+#' @title Plotting function for heterogeneity
+#' @description Creates a ggplot object for visualizing heterogeneity in data.
+#' @param data Data frame containing the data to be plotted.
+#' @param x Column name for the x-axis.
+#' @param y Column name for the y-axis.
+#' @param type Type of plot (e.g., "Heterogeneity").
+#' @param col Color for the bars in the plot.
+#' @return A ggplot object.
+#' 
+het_plot <- function(data, x, y, type, col = wes_palette('GrandBudapest1', 4, type = 'discrete')[4]) {
+  ggplot(data, aes(x = x, y = y)) +
+        geom_col(alpha = 1, color = col, fill = col) +
+        labs(y = expression(paste(italic(M)[])), x = "Level" , title = type) +
+        scale_y_continuous(labels = scales::number_format(accuracy = 0.01)) + 
+        theme_bw() +
+        theme(legend.background = element_blank(),
+              axis.text = element_text(size = 12, color = "black"),
+              axis.title = element_text(size = 12, color = "black"))
+}
