@@ -75,6 +75,8 @@
                                            ci.ub = Overall_Model$ci.ub)
   # Heterogeneity 
         Overall_Model_i2 <- data.frame(round(orchaRd::i2_ml(Overall_Model), 2))
+        Overall_Model_CV <- data.frame(round(orchaRd::cvh1_ml(Overall_Model), 2))
+         Overall_Model_M <- data.frame(round(orchaRd::m1_ml(Overall_Model), 2))
 
 ##### Individual-Level Trait Subset Model #####
         
@@ -1078,5 +1080,10 @@
   write.csv(Raw_Individual_Taxa, file = "./output/tables/Raw_Individual_Taxa.csv")
   
  # Heterogeneity Table
-      write.csv(t(Overall_Model_i2), file = "./output/tables/Complex_Heterogeneity_Overall.csv", row.names = FALSE)
+
+              het_table <- cbind(Overall_Model_i2,Overall_Model_CV,Overall_Model_M)
+    colnames(het_table) <- c("I2", "CV", "M")
+   row.names(het_table) <- gsub("I2_", "", row.names(het_table))
+
+    write.csv(het_table, file = "./output/tables/Complex_Heterogeneity_Overall.csv", row.names = FALSE)
       
