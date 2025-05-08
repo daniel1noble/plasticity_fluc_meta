@@ -200,6 +200,9 @@
         # Check robustness
         Trait_Model_rob <- robust(Trait_Model, cluster = Trait_Data$Study_ID, adjust = TRUE)
         
+        # Check variance explained of moderators
+        r2_ml(Trait_Model)
+
         # Extract estimates
         Trait_Model_Estimates <- data.frame(Category = substr(row.names(Trait_Model$b), 15, 100),
                                             estimate = Trait_Model$b, 
@@ -261,6 +264,9 @@
         # Check robustness
         Specific_Trait_Model_rob <- robust(Specific_Trait_Model, cluster = Specific_Trait_Data$Study_ID, adjust = TRUE)
         
+        # Check variance explained of moderators
+        r2_ml_trait <- r2_ml(Specific_Trait_Model)
+
         # Extract model estimates
         Specific_Trait_Model_Estimates <- data.frame(Trait = substr(row.names(Specific_Trait_Model$b), 12, 100),
                                                      estimate = Specific_Trait_Model$b, ci.lb = Specific_Trait_Model$ci.lb, 
