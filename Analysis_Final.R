@@ -14,12 +14,25 @@
   source("func.R")
 
 # Importing Data Set
-                    data <- read.csv("./Complex_Final_Data.csv")
+                    data <- read.csv("./Complexity_Final_Data.csv")
                 data$obs <- 1:nrow(data)
     data$Scientific_Name <- sub(" ", "_", data$Scientific_Name)
               data$phylo <- data$Scientific_Name
         data$vert_invert <- ifelse(data$Phylum == "Chordata" , "Vertebrate", "Invertebrate")
-        
+# Do some cleaning. There are a bunch of effects that would be undefined because of zeros. Instead of adding constant given we are using a response ratio style effect, we should exclude.
+
+how_many <- data %>% 
+  filter((T1_constant == 0 | T2_constant == 0 | Mean_T1_C == 0 | Mean_T1_F == 0 | 
+           Mean_T2_C == 0 | Mean_T2_F == 0 | 
+           SD_Final_T1_C == 0 | SD_Final_T2_C == 0 | 
+           SD_Final_T1_F == 0 | SD_Final_T2_F == 0))
+
+data <- data %>% 
+  filter(!(T1_constant == 0 | T2_constant == 0 | Mean_T1_C == 0 | Mean_T1_F == 0 | 
+           Mean_T2_C == 0 | Mean_T2_F == 0 | 
+           SD_Final_T1_C == 0 | SD_Final_T2_C == 0 | 
+           SD_Final_T1_F == 0 | SD_Final_T2_F == 0))
+
 # Calculate Effect sizes 
         
         data <- data  %>% 
