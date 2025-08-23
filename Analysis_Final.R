@@ -88,8 +88,8 @@ data <- data %>%
                                            ci.ub = Overall_Model$ci.ub)
   # Heterogeneity 
         Overall_Model_i2 <- data.frame(round(orchaRd::i2_ml(Overall_Model), 2))
-        Overall_Model_CV <- data.frame(round(orchaRd::cvh1_ml(Overall_Model), 2))
-         Overall_Model_M <- data.frame(round(orchaRd::m1_ml(Overall_Model), 2))
+        Overall_Model_CV <- data.frame(round(orchaRd::cvh2_ml(Overall_Model), 2))
+         Overall_Model_M <- data.frame(round(orchaRd::m2_ml(Overall_Model), 2))
 
 ##### Individual-Level Trait Subset Model #####
         
@@ -158,7 +158,7 @@ data <- data %>%
         
         size = 24
         position = "topleft"
-        fig2 <- (density_orchard_overall + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic"))  | indivdual_orchard_overall + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic")) ) + plot_annotation(tag_levels = "a", tag_suffix = ")")
+        fig2 <- (density_orchard_overall + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic")) / indivdual_orchard_overall + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic")) ) + plot_annotation(tag_levels = "a", tag_suffix = ")")
         
         ggsave(filename = "./output/figs/fig2.png", , width = 12, height =  5.8)
         
@@ -1031,10 +1031,10 @@ data <- data %>%
  Raw_Individual_Taxa <- table_results(Individual_Taxa, group = "vert_invert", study_name = "Study_ID", species_name = "Scientific_Name")
  
  # Publication bias
-  data$Precision <- 1/sqrt(data$v_PRRD)
+  data$inv_n_eff <- 1/sqrt(data$v_PRRD)
  
   if(rerun){
-    Overall_PubBias <- metafor::rma.mv(PRRD ~ 1 + Year_Z + Precision, V = VCV, test = "t", 
+    Overall_PubBias <- metafor::rma.mv(PRRD ~ 1 + Year_Z + n_eff, V = VCV, test = "t", 
                                      random = list(~1|phylo, 
                                                    ~1|Study_ID, 
                                                    ~1|obs, 
