@@ -1031,10 +1031,13 @@ data <- data %>%
  Raw_Individual_Taxa <- table_results(Individual_Taxa, group = "vert_invert", study_name = "Study_ID", species_name = "Scientific_Name")
  
  # Publication bias
-  data$inv_n_eff <- 1/sqrt(data$v_PRRD)
  
+ # calculate effective sample size for pub bias, Nakagawa et al. 2022 and Maccartney et al. 2022
+        data$inv_n_eff <- (1/data$n_T1_C) + (1/data$n_T1_F) + (1/data$n_T2_C) + (1/data$n_T2_F)
+  data$sqrt_inv_n_eff  <- sqrt(data$inv_n_eff)
+  
   if(rerun){
-    Overall_PubBias <- metafor::rma.mv(PRRD ~ 1 + Year_Z + n_eff, V = VCV, test = "t", 
+    Overall_PubBias <- metafor::rma.mv(PRRD ~ 1 + Year_Z + inv_n_eff, V = VCV, test = "t", 
                                      random = list(~1|phylo, 
                                                    ~1|Study_ID, 
                                                    ~1|obs, 
