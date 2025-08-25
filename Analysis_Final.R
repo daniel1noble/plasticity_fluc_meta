@@ -46,6 +46,9 @@ data <- data %>%
                                sd_t1_c = SD_Final_Transformed_T1_C, sd_t2_c=  SD_Final_Transformed_T2_C, sd_t1_f = SD_Final_Transformed_T1_F, sd_t2_f = SD_Final_Transformed_T2_F, 
                                n_t1_c =  n_T1_C, n_t2_c = n_T2_C, n_t1_f = n_T1_F, n_t2_f = n_T2_F, type = 'v'))
 
+# summarise study, species and effects
+summary  <- data  %>% summarise(effects = n(), studies = length(unique(Study_ID)), species = length(unique(Scientific_Name)))
+
 # Phylogenetic covariance matrix
             tree <- ape::read.tree("./Complex_tree")
              phy <- ape::compute.brlen(tree, method = "Grafen", power = 1)
@@ -132,7 +135,7 @@ data <- data %>%
                                                  ci.lb = Individual_Model$ci.lb, 
                                                  ci.ub = Individual_Model$ci.ub)
 
-##### Figure 2 #####
+#### Figure 2 ####
         my_theme <- function() {list( theme_classic() ,theme(axis.text.y = element_text(size = 16), 
                                                              axis.text.x = element_text(margin = margin(b = 5), size = 16), 
                                                              axis.ticks = element_blank(),
