@@ -26,6 +26,7 @@ how_many <- data %>%
            Mean_T2_C == 0 | Mean_T2_F == 0 | 
            SD_Final_T1_C == 0 | SD_Final_T2_C == 0 | 
            SD_Final_T1_F == 0 | SD_Final_T2_F == 0))
+dim(how_many) # only 9 effects removed
 
 data <- data %>% 
   filter(!(T1_constant == 0 | T2_constant == 0 | Mean_T1_C == 0 | Mean_T1_F == 0 | 
