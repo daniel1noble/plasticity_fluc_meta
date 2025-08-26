@@ -34,6 +34,53 @@ data <- data %>%
            SD_Final_T1_C == 0 | SD_Final_T2_C == 0 | 
            SD_Final_T1_F == 0 | SD_Final_T2_F == 0))
 
+
+# Conversions
+library(dplyr)
+
+
+asine_transform_with_sd <- function(mean, sd) {
+  # Convert if needed
+  if (max(mean, na.rm = TRUE) > 1) {
+    mean <- mean / 100
+    sd   <- sd / 100
+  }
+  # Transform mean
+  mean_t <- asin(sqrt(mean))
+  # Delta-method SD on transformed scale
+  sd_t   <- sd / (2 * sqrt(mean) * sqrt(1 - mean))
+  list(mean = mean_t, sd = sd_t)
+}
+
+back_mean <- function(m, s, per_transform = "No", ln_transform = "No") {
+  ifelse(per_transform == "Yes",
+         asine_transform_with_sd(m, s)$mean,
+         ifelse(ln_transform == "Yes",
+                exp(m + (s^2)/2),
+                m))
+}
+
+back_sd <- function(m, s, per_transform = "No", ln_transform = "No") {
+  ifelse(per_transform == "Yes",
+         asine_transform_with_sd(m, s)$sd,
+         ifelse(ln_transform == "Yes",
+                sqrt((exp(s^2)-1) * exp(2*m + s^2)),
+                s))
+}
+
+# Example usage inside mutate()
+# per_transform and ln_transform can be scalars or character columns ("Yes"/"No")
+data <- data %>%
+  mutate(
+    Mean_T1_C_trans = back_mean(Mean_T1_C, SD_Final_T1_C, per_transform, ln_transform),
+    Mean_T1_F_trans = back_mean(Mean_T1_F, SD_Final_T1_F, per_transform, ln_transform),
+    Mean_T2_C_trans = back_mean(Mean_T2_C, SD_Final_T2_C, per_transform, ln_transform),
+    Mean_T2_F_trans = back_mean(Mean_T2_F, SD_Final_T2_F, per_transform, ln_transform),
+    SD_Final_T1_C_trans = back_sd(Mean_T1_C, SD_Final_T1_C, per_transform, ln_transform, out = "proportion"),
+    SD_Final_T1_F_trans = back_sd(Mean_T1_F, SD_Final_T1_F, per_transform, ln_transform, out = "proportion"),
+    SD_Final_T2_C_trans = back_sd(Mean_T2_C, SD_Final_T2_C, per_transform, ln_transform, out = "proportion"),
+    SD_Final_T2_F_trans = back_sd(Mean_T2_F, SD_Final_T2_F, per_transform, ln_transform, out = "proportion")
+  )
 # Calculate Effect sizes 
         
         data <- data  %>% 
