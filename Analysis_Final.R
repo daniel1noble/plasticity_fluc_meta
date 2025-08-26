@@ -34,10 +34,9 @@ data <- data %>%
            SD_Final_T1_C == 0 | SD_Final_T2_C == 0 | 
            SD_Final_T1_F == 0 | SD_Final_T2_F == 0))
 
-
+#################
 # Conversions
-library(dplyr)
-
+##################
 
 asine_transform_with_sd <- function(mean, sd) {
   # Convert if needed
@@ -47,7 +46,7 @@ asine_transform_with_sd <- function(mean, sd) {
   }
   # Transform mean
   mean_t <- asin(sqrt(mean))
-  # Delta-method SD on transformed scale
+  # Delta-method SD on transformed scale. Equivalent to equation in paper
   sd_t   <- sd / (2 * sqrt(mean) * sqrt(1 - mean))
   list(mean = mean_t, sd = sd_t)
 }
@@ -76,10 +75,10 @@ data <- data %>%
     Mean_T1_F_trans = back_mean(Mean_T1_F, SD_Final_T1_F, per_transform, ln_transform),
     Mean_T2_C_trans = back_mean(Mean_T2_C, SD_Final_T2_C, per_transform, ln_transform),
     Mean_T2_F_trans = back_mean(Mean_T2_F, SD_Final_T2_F, per_transform, ln_transform),
-    SD_Final_T1_C_trans = back_sd(Mean_T1_C, SD_Final_T1_C, per_transform, ln_transform, out = "proportion"),
-    SD_Final_T1_F_trans = back_sd(Mean_T1_F, SD_Final_T1_F, per_transform, ln_transform, out = "proportion"),
-    SD_Final_T2_C_trans = back_sd(Mean_T2_C, SD_Final_T2_C, per_transform, ln_transform, out = "proportion"),
-    SD_Final_T2_F_trans = back_sd(Mean_T2_F, SD_Final_T2_F, per_transform, ln_transform, out = "proportion")
+    SD_Final_T1_C_trans = back_sd(Mean_T1_C, SD_Final_T1_C, per_transform, ln_transform),
+    SD_Final_T1_F_trans = back_sd(Mean_T1_F, SD_Final_T1_F, per_transform, ln_transform),
+    SD_Final_T2_C_trans = back_sd(Mean_T2_C, SD_Final_T2_C, per_transform, ln_transform),
+    SD_Final_T2_F_trans = back_sd(Mean_T2_F, SD_Final_T2_F, per_transform, ln_transform)
   )
 # Calculate Effect sizes 
         
