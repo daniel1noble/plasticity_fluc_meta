@@ -39,11 +39,6 @@ data <- data %>%
 ##################
 
 asine_transform_with_sd <- function(mean, sd) {
-  # Convert if needed
-  if (max(mean, na.rm = TRUE) > 1) {
-    mean <- mean / 100
-    sd   <- sd / 100
-  }
   # Transform mean
   mean_t <- asin(sqrt(mean))
   # Delta-method SD on transformed scale. Equivalent to equation in paper
@@ -67,6 +62,15 @@ back_sd <- function(m, s, per_transform = "No", ln_transform = "No") {
                 s))
 }
 
+# Convert from percentage to proportion for subset of data
+data <- data %>%
+  mutate(
+    across(starts_with("Mean"),
+           ~ if_else(Trait_Unit == "%", .x / 100, .x)),
+    across(starts_with("SD"),
+           ~ if_else(Trait_Unit == "%", .x / 100, .x))
+  )
+
 # per_transform and ln_transform can be scalars or character columns ("Yes"/"No")
 data <- data %>%
   mutate(
@@ -79,10 +83,15 @@ data <- data %>%
     SD_Final_T2_C_trans = back_sd(Mean_T2_C, SD_Final_T2_C, per_transform, ln_transform),
     SD_Final_T2_F_trans = back_sd(Mean_T2_F, SD_Final_T2_F, per_transform, ln_transform)
   )
-# Calculate Effect sizes 
-        
-        data <- data  %>% 
-          mutate(PRRD = PRRD(t1 = T1_constant, t2 = T2_constant, 
+
+# Check conversions  
+#data  %>% filter(per_transform == "Yes")
+#data  %>% filter(ln_transform == "Yes")
+
+# Calculate Effect sizes
+
+data <- data %>%
+  mutate(PRRD = PRRD(t1 = T1_constant, t2 = T2_constant,
                              t1_c = Mean_Transformed_T1_C, t2_c = Mean_Transformed_T2_C, t1_f = Mean_Transformed_T1_F, t2_f = Mean_Transformed_T2_F, 
                              sd_t1_c = SD_Final_Transformed_T1_C, sd_t2_c= SD_Final_Transformed_T2_C , sd_t1_f = SD_Final_Transformed_T1_F, sd_t2_f = SD_Final_Transformed_T2_F, 
                              n_t1_c =  n_T1_C, n_t2_c = n_T2_C, n_t1_f = n_T1_F, n_t2_f = n_T2_F, type = 'ef'),
