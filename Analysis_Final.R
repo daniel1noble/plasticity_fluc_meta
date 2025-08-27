@@ -61,8 +61,8 @@ data <- data %>%
   )
 
 # Check conversions  
-#data  %>% filter(per_transform == "Yes")
-#data  %>% filter(ln_transform == "Yes")
+# data  %>% filter(per_transform == "Yes")
+# data  %>% filter(ln_transform == "Yes")
 
 # Calculate Effect sizes using transformed data
 
