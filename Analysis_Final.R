@@ -13,6 +13,16 @@
   
   source("func.R")
 
+  my_theme <- function() {list( theme_classic() ,theme(axis.text.y = element_text(size = 16), 
+                                                             axis.text.x = element_text(margin = margin(b = 5), size = 16), 
+                                                             axis.ticks = element_blank(),
+                                                             axis.title = element_text(size = 18),
+                                                             legend.title = element_text(size = 15),
+                                                             legend.text = element_text(size = 15), 
+                                                             legend.position = "top",
+                                                             plot.tag = element_text(size = 16, face = "italic")))
+}
+  
 # Importing Data Set
                     data <- read.csv("./Complexity_Final_Data.csv")
                 data$obs <- 1:nrow(data)
@@ -34,9 +44,8 @@ data <- data %>%
            SD_Final_T1_C == 0 | SD_Final_T2_C == 0 | 
            SD_Final_T1_F == 0 | SD_Final_T2_F == 0))
 
-#################
-# Conversions
-##################
+
+#### Conversions ####
 
 # Convert from percentage to proportion for subset of data
 data <- data %>%
@@ -64,6 +73,7 @@ data <- data %>%
 # data  %>% filter(per_transform == "Yes")
 # data  %>% filter(ln_transform == "Yes")
 
+#### Calculate Effect sizes ####
 # Calculate Effect sizes using transformed data
 
 data <- data %>%
@@ -79,6 +89,7 @@ data <- data %>%
 # summarise study, species and effects
 summary  <- data  %>% summarise(effects = n(), studies = length(unique(Study_ID)), species = length(unique(Scientific_Name)))
 
+#### Phylogenetic matrix ####
 # Phylogenetic covariance matrix
             tree <- ape::read.tree("./Complex_tree")
              phy <- ape::compute.brlen(tree, method = "Grafen", power = 1)
@@ -172,68 +183,49 @@ summary  <- data  %>% summarise(effects = n(), studies = length(unique(Study_ID)
                                                  ci.ub = Individual_Model$ci.ub)
 
 #### Figure 2 ####
-        my_theme <- function() {list( theme_classic() ,theme(axis.text.y = element_text(size = 16), 
-                                                             axis.text.x = element_text(margin = margin(b = 5), size = 16), 
-                                                             axis.ticks = element_blank(),
-                                                             axis.title = element_text(size = 18),
-                                                             legend.title = element_text(size = 15),
-                                                             legend.text = element_text(size = 15), 
-                                                             legend.position = "top",
-                                                             plot.tag = element_text(size = 16, face = "italic")))
-        }
-  
-        trunk.size = 1
-        density_orchard_overall <- orchard_plot(Overall_Model, group = "Study_ID", mod = "1", xlab = TeX(" Effect Size ($PRRD_{S}$)"), angle = 45, k = FALSE, g = FALSE, trunk.size = trunk.size) + ylim(-0.18, 0.18) + my_theme() + 
-          annotate('text',  x =1+0.1, y = 0.18,
-                   label= paste("italic(k)==", dim(data)[1], "~","(", length(unique(data$Study_ID)), ")"), parse = TRUE, hjust = "right", size = 6) +
-          annotate('text', label= paste(format(round(mean(exp(Overall_Model_Estimates[1, "estimate"])-1)*100, 2), nsmall = 2), "%"),
-                   x = 1+0.1, y = -0.15, size = 6) + geom_hline(yintercept =  c(-0.2, -0.1, 0.1, 0.2), linetype = "dashed", colour = "gray80") + scale_x_discrete(labels = c("Intrcpt" = "Overall")) + scale_fill_manual(values = "gray") +  scale_colour_manual(values = "black")
+trunk.size = 1
+size = 24
+position = "topleft"
+
+density_orchard_overall <- orchard_plot(Overall_Model, group = "Study_ID", mod = "1", xlab = TeX(" Effect Size ($PRRD_{S}$)"), angle = 45, k = FALSE, g = FALSE, trunk.size = trunk.size) + ylim(-0.18, 0.18) + my_theme() + annotate('text',  x =1+0.1, y = 0.18, label= paste("italic(k)==", dim(data)[1], "~","(", length(unique(data$Study_ID)), ")"), parse = TRUE, hjust = "right", size = 6) + annotate('text', label= paste(format(round(mean(exp(Overall_Model_Estimates[1, "estimate"])-1)*100, 2), nsmall = 2), "%"), x = 1+0.1, y = -0.15, size = 6) + geom_hline(yintercept =  c(-0.2, -0.1, 0.1, 0.2), linetype = "dashed", colour = "gray80") + scale_x_discrete(labels = c("Intrcpt" = "Overall")) + scale_fill_manual(values = "gray") +  scale_colour_manual(values = "black")        
         
+indivdual_orchard_overall <- orchard_plot(Individual_Model, group = "Study_ID", mod = "1", xlab = TeX(" Effect Size ($PRRD_{S}$)"), angle = 45, k = FALSE, g = FALSE, trunk.size = trunk.size) + ylim(-0.18, 0.18) + my_theme() + annotate('text',  x =1+0.1, y = 0.18,label= paste("italic(k)==", dim(Individual_Subset_Data)[1], "~","(", length(unique(Individual_Subset_Data$Study_ID)), ")"), parse = TRUE, hjust = "right", size = 6) + annotate('text', label= paste(format(round(mean(exp(Individual_Model_Estimates[1, "estimate"])-1)*100, 2), nsmall = 2), "%"),x = 1+0.1, y = -0.15, size = 6) + geom_hline(yintercept =  c(-0.2, -0.1, 0.1, 0.2), linetype = "dashed", colour = "gray80") + scale_x_discrete(labels = c("Intrcpt" = "")) + scale_fill_manual(values = "gray") + scale_colour_manual(values = "black")
+
+fig2 <- (density_orchard_overall + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic")) / indivdual_orchard_overall + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic")) ) + plot_annotation(tag_levels = "a", tag_suffix = ")")
+
+ggsave(filename = "./output/figs/fig2.png", plot = fig2, width = 12, height =  5.8)
+
+#### Overall Model - Trait Meta-Regression ####
         
-        indivdual_orchard_overall <- orchard_plot(Individual_Model, group = "Study_ID", mod = "1", xlab = TeX(" Effect Size ($PRRD_{S}$)"), angle = 45, k = FALSE, g = FALSE, trunk.size = trunk.size) + ylim(-0.18, 0.18) + my_theme() + 
-          annotate('text',  x =1+0.1, y = 0.18,
-                   label= paste("italic(k)==", dim(Individual_Subset_Data)[1], "~","(", length(unique(Individual_Subset_Data$Study_ID)), ")"), parse = TRUE, hjust = "right", size = 6) +
-          annotate('text', label= paste(format(round(mean(exp(Individual_Model_Estimates[1, "estimate"])-1)*100, 2), nsmall = 2), "%"),
-                   x = 1+0.1, y = -0.15, size = 6) + geom_hline(yintercept =  c(-0.2, -0.1, 0.1, 0.2), linetype = "dashed", colour = "gray80") + scale_x_discrete(labels = c("Intrcpt" = "")) + scale_fill_manual(values = "gray") + scale_colour_manual(values = "black")
+# Have a look at the data
+Trait_Exploration <- data %>% select("Trait_Category") %>% table() %>% data.frame()
+rownames(Trait_Exploration) <- Trait_Exploration$Trait_Category
         
-        size = 24
-        position = "topleft"
-        fig2 <- (density_orchard_overall + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic")) / indivdual_orchard_overall + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic")) ) + plot_annotation(tag_levels = "a", tag_suffix = ")")
-        
-        ggsave(filename = "./output/figs/fig2.png", , width = 12, height =  5.8)
-        
-##### Overall Model - Trait Meta-Regression #####
-        
-        # Have a look at the data
-        Trait_Exploration <- data %>% select("Trait_Category") %>% table() %>% data.frame()
-        rownames(Trait_Exploration) <- Trait_Exploration$Trait_Category
-        
-        # Exclude some categories with low numbers of effects
+# Exclude some categories with low numbers of effects
         Trait_Data <- data %>% filter(Trait_Category != "Behavioural" &
                                         Trait_Category != "Gene Expression" &
                                         Trait_Category != "Population")
         
-        # How many species?
-        Trait_Species_Count <- Trait_Data %>% select("Scientific_Name", "Trait_Category") %>% table() %>% data.frame() %>% 
-          filter(`Freq` != 0) %>% select("Trait_Category") %>% table() %>% data.frame()
-        rownames(Trait_Species_Count) <- Trait_Species_Count$Trait_Category
+# How many species?
+Trait_Species_Count <- Trait_Data %>% select("Scientific_Name", "Trait_Category") %>% table() %>% data.frame() %>% 
+filter(`Freq` != 0) %>% select("Trait_Category") %>% table() %>% data.frame()
+rownames(Trait_Species_Count) <- Trait_Species_Count$Trait_Category
         
-        # How many studies
-        Trait_Study_Count <- Trait_Data %>% select("Study_ID", "Trait_Category") %>% table() %>% data.frame() %>% 
-          filter(`Freq` != 0) %>% select("Trait_Category") %>% table() %>% data.frame()
-        rownames(Trait_Study_Count) <- Trait_Study_Count$Trait_Category
+# How many studies
+Trait_Study_Count <- Trait_Data %>% select("Study_ID", "Trait_Category") %>% table() %>% data.frame() %>% filter(`Freq` != 0) %>% select("Trait_Category") %>% table() %>% data.frame()
+rownames(Trait_Study_Count) <- Trait_Study_Count$Trait_Category
         
-        # Phylo matrix
-        Trait_Species <- Trait_Data %>% select("phylo") %>% unique()
-        Trait_A_cor <- as.data.frame(A_cor)
-        Trait_A_cor <- Trait_A_cor[c(Trait_Species$phylo), c(Trait_Species$phylo)]
-        Trait_A_cor <- as.matrix(Trait_A_cor)
+# Phylo matrix
+Trait_Species <- Trait_Data %>% select("phylo") %>% unique()
+Trait_A_cor <- as.data.frame(A_cor)
+Trait_A_cor <- Trait_A_cor[c(Trait_Species$phylo), c(Trait_Species$phylo)]
+Trait_A_cor <- as.matrix(Trait_A_cor)
         
-        # VCV matrix
-        Trait_VCV <- make_VCV_matrix(Trait_Data, V = "v_PRRD", cluster = "Shared_Control_Number")
+# VCV matrix
+Trait_VCV <- make_VCV_matrix(Trait_Data, V = "v_PRRD", cluster = "Shared_Control_Number")
         
-        run <- TRUE
-        system.time(
+run <- TRUE
+system.time(
           if(run){
             Trait_Model <- metafor::rma.mv(PRRD, V = Trait_VCV, test = "t", 
                                            mods = ~ Trait_Category - 1,
@@ -248,16 +240,16 @@ summary  <- data  %>% summarise(effects = n(), studies = length(unique(Study_ID)
             saveRDS(Trait_Model, "./output/models/Complex_Trait_Model.rds")
           } else {
             Trait_Model <- readRDS("./output/models/Complex_Trait_Model.rds")
-          })
+})
         
-        # Check robustness
-        Trait_Model_rob <- robust(Trait_Model, cluster = Trait_Data$Study_ID, adjust = TRUE)
+# Check robustness
+Trait_Model_rob <- robust(Trait_Model, cluster = Trait_Data$Study_ID, adjust = TRUE)
         
-        # Check variance explained of moderators
-        r2_ml(Trait_Model)
+# Check variance explained of moderators
+r2_ml(Trait_Model)
 
-        # Extract estimates
-        Trait_Model_Estimates <- data.frame(Category = substr(row.names(Trait_Model$b), 15, 100),
+# Extract estimates
+Trait_Model_Estimates <- data.frame(Category = substr(row.names(Trait_Model$b), 15, 100),
                                             estimate = Trait_Model$b, 
                                             ci.lb = Trait_Model$ci.lb, 
                                             ci.ub = Trait_Model$ci.ub,
@@ -265,7 +257,7 @@ summary  <- data  %>% summarise(effects = n(), studies = length(unique(Study_ID)
                                             pval = Trait_Model$pval)
         rownames(Trait_Model_Estimates) <- Trait_Model_Estimates$Category
         
-##### Overall Model - Specific Trait Meta-Regression #####
+#### Overall Model - Specific Trait Meta-Regression ####
         
         # Check data
         Specific_Trait_Exploration <- data %>% select("Measurement") %>% table() %>% data.frame()
@@ -326,31 +318,31 @@ summary  <- data  %>% summarise(effects = n(), studies = length(unique(Study_ID)
                                                      ci.ub = Specific_Trait_Model$ci.ub)
         rownames(Specific_Trait_Model_Estimates) <- Specific_Trait_Model_Estimates$Trait
         
-##### Figure 3  #####
-        # Preparing Graph 
+#### Figure 3  ####
+# Preparing Graph 
         
-        trait_rnames <- c("Biochemical Assay", "Life-history Traits", 
+trait_rnames <- c("Biochemical Assay", "Life-history Traits", 
                           "Morphological", "Physiological")
         
-        trait_k <- data.frame("k" = c(Trait_Exploration["Biochemical Assay", "Freq"], 
+trait_k <- data.frame("k" = c(Trait_Exploration["Biochemical Assay", "Freq"], 
                                       Trait_Exploration["Life-History Traits", "Freq"], 
                                       Trait_Exploration["Morphology", "Freq"], 
                                       Trait_Exploration["Physiological", "Freq"]), 
                               row.names = trait_rnames)
         
-        trait_group_no <- data.frame("Spp No." = c(Trait_Species_Count["Biochemical Assay", "Freq"], 
-                                                   Trait_Species_Count["Life-History Traits", "Freq"],
-                                                   Trait_Species_Count["Morphology", "Freq"],
-                                                   Trait_Species_Count["Physiological", "Freq"]), 
+trait_group_no <- data.frame("Spp No." = c(Trait_Species_Count["Biochemical Assay", "Freq"], 
+                                           Trait_Species_Count["Life-History Traits", "Freq"],
+                                           Trait_Species_Count["Morphology", "Freq"],
+                                           Trait_Species_Count["Physiological", "Freq"]), 
                                      row.names = trait_rnames)
         
-        trait_study <- data.frame("Study" = c(Trait_Study_Count["Biochemical Assay", "Freq"], 
-                                              Trait_Study_Count["Life-History Traits", "Freq"],
-                                              Trait_Study_Count["Morphology", "Freq"],
-                                              Trait_Study_Count["Physiological", "Freq"]), 
+trait_study <- data.frame("Study" = c(Trait_Study_Count["Biochemical Assay", "Freq"], 
+                                      Trait_Study_Count["Life-History Traits", "Freq"],
+                                      Trait_Study_Count["Morphology", "Freq"],
+                                      Trait_Study_Count["Physiological", "Freq"]), 
                                   row.names = trait_rnames)
         
-        trait_table <- data.frame(estimate = Trait_Model_Estimates[,"estimate"], 
+trait_table <- data.frame(estimate = Trait_Model_Estimates[,"estimate"], 
                                   lowerCL = Trait_Model_Estimates[,"ci.lb"], 
                                   upperCL = Trait_Model_Estimates[,"ci.ub"], 
                                   df = Trait_Model_Estimates[,"df"],
@@ -360,27 +352,21 @@ summary  <- data  %>% summarise(effects = n(), studies = length(unique(Study_ID)
                                   row.names = trait_rnames)
         trait_table$name <- row.names(trait_table)
         
-        trait_raw_mean <- c(unlist(unname(Trait_Data %>% filter(`Trait_Category` == "Biochemical Assay") %>% 
-                                            select("InRR_Transformed"))), 
-                            unlist(unname(Trait_Data %>% filter(`Trait_Category` == "Life-History Traits") %>% 
-                                            select("InRR_Transformed"))), 
-                            unlist(unname(Trait_Data %>% filter(`Trait_Category` == "Morphology") %>% 
-                                            select("InRR_Transformed"))),
-                            unlist(unname(Trait_Data %>% filter(`Trait_Category` == "Physiological") %>% 
-                                            select("InRR_Transformed"))))
+trait_raw_mean <- c(unlist(unname(Trait_Data %>% filter(`Trait_Category` == "Biochemical Assay") %>% 
+select("InRR_Transformed"))), unlist(unname(Trait_Data %>% filter(`Trait_Category` == "Life-History Traits") %>% 
+select("InRR_Transformed"))), unlist(unname(Trait_Data %>% filter(`Trait_Category` == "Morphology") %>% 
+select("InRR_Transformed"))), unlist(unname(Trait_Data %>% filter(`Trait_Category` == "Physiological") %>% 
+select("InRR_Transformed"))))
+
+trait_raw_name <- c(replicate(32, "Biochemical Assay"), 
+                    replicate(68, "Life-history Traits"), 
+                    replicate(54, "Morphological"),
+                    replicate(41, "Physiological"))
         
-        trait_raw_name <- c(replicate(32, "Biochemical Assay"), 
-                            replicate(68, "Life-history Traits"), 
-                            replicate(54, "Morphological"),
-                            replicate(41, "Physiological"))
-        
-        trait_raw_df <- data.frame("Model" = trait_raw_name, 
-                                   "Effect" = trait_raw_mean)
-        
-        
-        # Preparing Graph 
-        
-        specific_trait_rnames <- c("Development Time", "Length", "Mass", "Metabolic Rate")
+trait_raw_df <- data.frame("Model" = trait_raw_name, 
+                          "Effect" = trait_raw_mean)
+               
+specific_trait_rnames <- c("Development Time", "Length", "Mass", "Metabolic Rate")
         
         specific_trait_k <- data.frame("k" = c(Specific_Trait_Exploration["Development Time", "Freq"], 
                                                Specific_Trait_Exploration["Length", "Freq"], 
@@ -420,17 +406,17 @@ summary  <- data  %>% summarise(effects = n(), studies = length(unique(Study_ID)
                                      unlist(unname(Specific_Trait_Data %>% filter(`Measurement` == "Metabolic Rate") %>% 
                                                      select("InRR_Transformed"))))
         
-        specific_trait_raw_name <- c(replicate(46, "Development Time"), 
+specific_trait_raw_name <- c(replicate(46, "Development Time"), 
                                      replicate(14, "Length"), 
                                      replicate(25, "Mass"), 
                                      replicate(12, "Metabolic Rate"))
         
-        specific_trait_raw_df <- data.frame("Model" = specific_trait_raw_name, 
+specific_trait_raw_df <- data.frame("Model" = specific_trait_raw_name, 
                                             "Effect" = specific_trait_raw_mean)
         
-        trunk.size = 1
-        branch.size = 1.5
-        density_trait_orchard <- orchard_plot(Trait_Model, group = "Study_ID", mod = "Trait_Category", xlab = TeX(" Effect Size ($PRRD_{S}$)"), angle = 45, k = FALSE, g = FALSE, trunk.size = trunk.size, branch.size = branch.size) + ylim(-0.18, 0.18) + 
+trunk.size = 1
+branch.size = 1.5
+density_trait_orchard <- orchard_plot(Trait_Model, group = "Study_ID", mod = "Trait_Category", xlab = TeX(" Effect Size ($PRRD_{S}$)"), angle = 45, k = FALSE, g = FALSE, trunk.size = trunk.size, branch.size = branch.size) + ylim(-0.18, 0.18) + 
           my_theme() + 
           annotate('text',  x = c(1,2,3,4)+0.25, y = 0.18, label = 
                      paste("italic(k)==", c(trait_table["Biochemical Assay", "K"], 
@@ -449,30 +435,29 @@ summary  <- data  %>% summarise(effects = n(), studies = length(unique(Study_ID)
             x = c(1,2,3,4)+0.25, y = -0.10, size = 6) + geom_hline(yintercept =  c(-0.2, -0.1, 0.1, 0.2), linetype = "dashed", colour = "gray80") +  scale_colour_manual(values = c("black", "black", "black", "black"))
         
         
-        density_specific_trait_orchard <- orchard_plot(Specific_Trait_Model, group = "Study_ID", mod = "Measurement", xlab = TeX(" Effect Size ($PRRD_{S}$)"), angle = 45, k = FALSE, g = FALSE, trunk.size = trunk.size, branch.size = branch.size) + ylim(-0.12, 0.12) + 
+density_specific_trait_orchard <- orchard_plot(Specific_Trait_Model, group = "Study_ID", mod = "Measurement", xlab = TeX(" Effect Size ($PRRD_{S}$)"), angle = 45, k = FALSE, g = FALSE, trunk.size = trunk.size, branch.size = branch.size) + ylim(-0.12, 0.12) + 
           my_theme() + 
           annotate('text',  x = c(1,2,3,4)+0.25, y = 0.12, label= paste("italic(k)==", c(specific_trait_table["Development Time", "K"],
-                                                                                        specific_trait_table["Length", "K"],
-                                                                                        specific_trait_table["Mass", "K"],
-                                                                                        specific_trait_table["Metabolic Rate", "K"]), "~","(", 
-                                                                       c(specific_trait_table["Development Time", "group_no"],
-                                                                         specific_trait_table["Length", "group_no"],
-                                                                         specific_trait_table["Mass", "group_no"],
-                                                                         specific_trait_table["Metabolic Rate", "group_no"]), 
-                                                                       ")"), parse = TRUE, hjust = "right", size = 6) +
-          annotate('text', label=c(paste(format(round(mean(exp(Specific_Trait_Model_Estimates["Development Time", "estimate"])-1)*100, 2), nsmall = 2), "%"), paste(format(round(mean(exp(Specific_Trait_Model_Estimates["Length", "estimate"])-1)*100, 2), nsmall = 2), "%"),
+specific_trait_table["Length", "K"],
+specific_trait_table["Mass", "K"],
+specific_trait_table["Metabolic Rate", "K"]), "~","(", 
+c(specific_trait_table["Development Time", "group_no"],
+specific_trait_table["Length", "group_no"],
+specific_trait_table["Mass", "group_no"],
+specific_trait_table["Metabolic Rate", "group_no"]), ")"), parse = TRUE, hjust = "right", size = 6) +
+annotate('text', label=c(paste(format(round(mean(exp(Specific_Trait_Model_Estimates["Development Time", "estimate"])-1)*100, 2), nsmall = 2), "%"), paste(format(round(mean(exp(Specific_Trait_Model_Estimates["Length", "estimate"])-1)*100, 2), nsmall = 2), "%"),
                                    paste(format(round(mean(exp(Specific_Trait_Model_Estimates["Mass", "estimate"])-1)*100, 2), nsmall = 2), "%"),
                                    paste(format(round(mean(exp(Specific_Trait_Model_Estimates["Metabolic Rate", "estimate"])-1)*100, 2), nsmall = 2), "%")), 
                    x = c(1,2,3,4)+0.25, y = -0.08, size = 6) + geom_hline(yintercept =  c(-0.2, -0.1, 0.1, 0.2), linetype = "dashed", colour = "gray80") + annotate('text',  x = c(1,3)+0.25, y = -0.025, label = "*", size = 10) +  scale_colour_manual(values = c("black", "black", "black", "black"))
         
-        size = 24
-        position = "topleft"
-        fig3 <- (density_trait_orchard + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic")) | density_specific_trait_orchard + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic"))) + plot_annotation(tag_levels = "a", tag_suffix = ")") 
+size = 24
+position = "topleft"
+
+fig3 <- (density_trait_orchard + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic")) | density_specific_trait_orchard + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic"))) + plot_annotation(tag_levels = "a", tag_suffix = ")") 
         
-        ggsave(filename = "./output/figs/fig3.png", fig3, width = 15, height =  7.4125)
+ggsave(filename = "./output/figs/fig3.png", fig3, width = 15, height =  7.4125)
         
-        
-##### Overall Model - Invertebrate/Vertebrate Meta-Regression #####
+#### Overall Model - Invertebrate/Vertebrate Meta-Regression ####
         
         # Lets have a look at data in each category
         vert_invert_Exploration <- data %>% select("vert_invert") %>% table() %>% data.frame()
@@ -508,7 +493,7 @@ summary  <- data  %>% summarise(effects = n(), studies = length(unique(Study_ID)
                                                   pval = vert_invert_Model$pval)
         rownames(vert_invert_Model_Estimates) <- NULL
         
-##### Overall Model - Habitat Meta-Regression #####
+#### Overall Model - Habitat Meta-Regression ####
         
         run <- TRUE
         system.time(
@@ -539,7 +524,7 @@ summary  <- data  %>% summarise(effects = n(), studies = length(unique(Study_ID)
                                               pval = habitat_Model$pval)
         rownames(habitat_Model_Estimates) <- NULL
         
-##### Figure 4 #####
+#### Figure 4 ####
         
         invert_vert_table <- data  %>% group_by(vert_invert) %>% summarise(group_no = n_distinct(Study_ID), spp = n_distinct(phylo), k = n()) %>% cbind(vert_invert_Model_Estimates[,-1])
         
@@ -607,7 +592,7 @@ summary  <- data  %>% summarise(effects = n(), studies = length(unique(Study_ID)
         
         
         
-##### Overall Model - Fluctuation Amplitude Meta-Regression ####
+#### Overall Model - Fluctuation Amplitude Meta-Regression ####
         run <- TRUE
         system.time(
           if(run){
@@ -634,7 +619,7 @@ summary  <- data  %>% summarise(effects = n(), studies = length(unique(Study_ID)
                                                    ci.lb = Amplitude_Model$ci.lb, 
                                                    ci.ub = Amplitude_Model$ci.ub)
     
-##### Overall Model - Type of Fluctuation Meta-Regression ####     
+#### Overall Model - Type of Fluctuation Meta-Regression ####     
        # Filter missing data
           Fluctuation_Data <- data %>% filter(!is.na(Fluctuation_Category))
         
@@ -696,7 +681,7 @@ summary  <- data  %>% summarise(effects = n(), studies = length(unique(Study_ID)
                                                   ci.ub = Fluctuation_Model$ci.ub)
       rownames(Fluctuation_Model_Estimates) <- Fluctuation_Model_Estimates$Category   
         
-##### Figure 5 ####
+#### Figure 5 ####
       # Preparing Graph - Combined
       
       fluctuation_rnames <- c("Sinusoidal (Sine Curve)", "Alternating", "Stepwise")
@@ -762,7 +747,7 @@ summary  <- data  %>% summarise(effects = n(), studies = length(unique(Study_ID)
       
 ##--------------------------------------------##      
 
-##### Overall model - Plasticity_Mechanism Meta-Regression #####
+#### Overall model - Plasticity_Mechanism Meta-Regression ####
       
       # Filter out population as this doesn't jive with inidviudal-level plasticity
       plasticity_mec_data  <- data %>%  filter(Trait_Category != "Population")
@@ -810,7 +795,7 @@ summary  <- data  %>% summarise(effects = n(), studies = length(unique(Study_ID)
                                   cbind(PlasticityMechanism_Model_Estimates) 
       rownames(plasticity_mechanism_dat) <- plasticity_mechanism_dat$Plasticity_Mechanism
       
-##### Figure 6 #####
+#### Figure 6 ####
       
       plasticity_mechanism_dat <- plasticity_mec_data %>% group_by(Plasticity_Mechanism) %>% summarise(group_no = length(unique(Study_ID)), spp = length(unique(phylo)), k = n())  %>% cbind(PlasticityMechanism_Model_Estimates) 
       rownames(plasticity_mechanism_dat) <- plasticity_mechanism_dat$Plasticity_Mechanism
@@ -831,7 +816,7 @@ summary  <- data  %>% summarise(effects = n(), studies = length(unique(Study_ID)
       
       ggsave(filename = "./output/figs/fig6.png", density_plasticiyMechanism_orchard, width = 7, height =  5)
 
-##### Individual-Level Subset Model - Fluctuation Amplitude Meta-Regression ####
+#### Individual-Level Subset Model - Fluctuation Amplitude Meta-Regression ####
       run <- TRUE
       system.time(
         if(run){
@@ -857,7 +842,7 @@ summary  <- data  %>% summarise(effects = n(), studies = length(unique(Study_ID)
                                                          ci.lb = Individual_Amplitude_Model$ci.lb, 
                                                          ci.ub = Individual_Amplitude_Model$ci.ub)
    
-##### Individual-Level Subset Model - Type of Fluctuation Meta-Regression ####
+#### Individual-Level Subset Model - Type of Fluctuation Meta-Regression ####
       Individual_Fluctuation_Data <- Individual_Subset_Data %>% filter(!is.na(Fluctuation_Category))
       
       Individual_Fluctuation_Exploration <- Individual_Fluctuation_Data %>% select("Fluctuation_Category") %>% table() %>% data.frame()
@@ -946,7 +931,7 @@ summary  <- data  %>% summarise(effects = n(), studies = length(unique(Study_ID)
       individual_fluctuation_raw_df <- data.frame("Model" = individual_fluctuation_raw_name, 
                                                   "Effect" = individual_fluctuation_raw_mean)
       
-##### Figure 7 ####
+#### Figure 7 ####
       # Plot the fluctuation relationship for overall data set
       Plot_Data <- data
       Plot_Data <- Plot_Data %>% mutate(n_category = ifelse(n_T1_C <= 10, "10", 
@@ -977,7 +962,7 @@ summary  <- data  %>% summarise(effects = n(), studies = length(unique(Study_ID)
       
       Individual_Plot_Data <- Individual_Subset_Data
       Individual_Plot_Data <- Individual_Plot_Data %>% mutate(n_category = ifelse(n_T1_C <= 10, "10", 
-                                                                                  ifelse(n_T1_C > 10 & n_T1_C <= 20, "20", 
+         ifelse(n_T1_C > 10 & n_T1_C <= 20, "20", 
                                                                                          ifelse(n_T1_C > 20 & n_T1_C <= 30, "30", "> 30"))))
       
       # Graph Code
@@ -1035,7 +1020,7 @@ summary  <- data  %>% summarise(effects = n(), studies = length(unique(Study_ID)
                                                ci.lb = Individual_Taxa$ci.lb, 
                                                ci.ub = Individual_Taxa$ci.ub)
       
-##### Supplementary Material Results #####
+#### Supplementary Material Results ####
       
   # Phylogenetic Tree with labels
 
