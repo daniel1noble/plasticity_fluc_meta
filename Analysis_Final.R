@@ -38,30 +38,6 @@ data <- data %>%
 # Conversions
 ##################
 
-asine_transform_with_sd <- function(mean, sd) {
-  # Transform mean
-  mean_t <- asin(sqrt(mean))
-  # Delta-method SD on transformed scale. Equivalent to equation in paper
-  sd_t   <- sd / (2 * sqrt(mean) * sqrt(1 - mean))
-  list(mean = mean_t, sd = sd_t)
-}
-
-back_mean <- function(m, s, per_transform = "No", ln_transform = "No") {
-  ifelse(per_transform == "Yes",
-         asine_transform_with_sd(mean = m, sd = s)$mean,
-         ifelse(ln_transform == "Yes",
-                exp(m + (s^2)/2),
-                m))
-}
-
-back_sd <- function(m, s, per_transform = "No", ln_transform = "No") {
-  ifelse(per_transform == "Yes",
-         asine_transform_with_sd(mean = m, sd = s)$sd,
-         ifelse(ln_transform == "Yes",
-                sqrt((exp(s^2)-1) * exp(2*m + s^2)),
-                s))
-}
-
 # Convert from percentage to proportion for subset of data
 data <- data %>%
   mutate(
@@ -88,16 +64,16 @@ data <- data %>%
 #data  %>% filter(per_transform == "Yes")
 #data  %>% filter(ln_transform == "Yes")
 
-# Calculate Effect sizes
+# Calculate Effect sizes using transformed data
 
 data <- data %>%
   mutate(PRRD = PRRD(t1 = T1_constant, t2 = T2_constant,
-                             t1_c = Mean_Transformed_T1_C, t2_c = Mean_Transformed_T2_C, t1_f = Mean_Transformed_T1_F, t2_f = Mean_Transformed_T2_F, 
-                             sd_t1_c = SD_Final_Transformed_T1_C, sd_t2_c= SD_Final_Transformed_T2_C , sd_t1_f = SD_Final_Transformed_T1_F, sd_t2_f = SD_Final_Transformed_T2_F, 
+                             t1_c = Mean_T1_C_trans, t2_c = Mean_T2_C_trans, t1_f = Mean_T1_F_trans, t2_f = Mean_T2_F_trans,
+                             sd_t1_c = SD_Final_T1_C_trans, sd_t2_c= SD_Final_T2_C_trans, sd_t1_f = SD_Final_T1_F_trans, sd_t2_f = SD_Final_T2_F_trans,
                              n_t1_c =  n_T1_C, n_t2_c = n_T2_C, n_t1_f = n_T1_F, n_t2_f = n_T2_F, type = 'ef'),
-                 v_PRRD = PRRD(t1 = T1_constant, t2 = T2_constant, 
-                               t1_c = Mean_Transformed_T1_C, t2_c = Mean_Transformed_T2_C, t1_f = Mean_Transformed_T1_F, t2_f = Mean_Transformed_T2_F, 
-                               sd_t1_c = SD_Final_Transformed_T1_C, sd_t2_c=  SD_Final_Transformed_T2_C, sd_t1_f = SD_Final_Transformed_T1_F, sd_t2_f = SD_Final_Transformed_T2_F, 
+                 v_PRRD = PRRD(t1 = T1_constant, t2 = T2_constant,
+                               t1_c = Mean_T1_C_trans, t2_c = Mean_T2_C_trans, t1_f = Mean_T1_F_trans, t2_f = Mean_T2_F_trans,
+                               sd_t1_c = SD_Final_T1_C_trans, sd_t2_c=  SD_Final_T2_C_trans, sd_t1_f = SD_Final_T1_F_trans, sd_t2_f = SD_Final_T2_F_trans,
                                n_t1_c =  n_T1_C, n_t2_c = n_T2_C, n_t1_f = n_T1_F, n_t2_f = n_T2_F, type = 'v'))
 
 # summarise study, species and effects
@@ -109,6 +85,12 @@ summary  <- data  %>% summarise(effects = n(), studies = length(unique(Study_ID)
                A <- ape::vcv.phylo(phy)
     row.names(A) <- colnames(A) <- row.names(A)
            A_cor <- ape::vcv.phylo(phy, corr = TRUE)
+
+# Phylo matrix prune
+        overall_Species <- data %>% select("phylo")
+        overall_A_cor <- as.data.frame(A_cor)
+        overall_A_cor <- overall_A_cor[overall_Species$phylo, overall_Species$phylo]
+        overall_A_cor <- as.matrix(overall_A_cor)
 
 # Periods used in different studies 
         sum_period <- data %>% 
