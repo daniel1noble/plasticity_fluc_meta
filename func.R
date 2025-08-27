@@ -121,3 +121,29 @@ het_plot <- function(data, x, y, type, col = wes_palette('GrandBudapest1', 4, ty
               axis.text = element_text(size = 12, color = "black"),
               axis.title = element_text(size = 12, color = "black"))
 }
+
+
+
+asine_transform_with_sd <- function(mean, sd) {
+  # Transform mean
+  mean_t <- asin(sqrt(mean))
+  # Delta-method SD on transformed scale. Equivalent to equation in paper
+  sd_t   <- sd / (2 * sqrt(mean) * sqrt(1 - mean))
+  list(mean = mean_t, sd = sd_t)
+}
+
+back_mean <- function(m, s, per_transform = "No", ln_transform = "No") {
+  ifelse(per_transform == "Yes",
+         asine_transform_with_sd(mean = m, sd = s)$mean,
+         ifelse(ln_transform == "Yes",
+                exp(m + (s^2)/2),
+                m))
+}
+
+back_sd <- function(m, s, per_transform = "No", ln_transform = "No") {
+  ifelse(per_transform == "Yes",
+         asine_transform_with_sd(mean = m, sd = s)$sd,
+         ifelse(ln_transform == "Yes",
+                sqrt((exp(s^2)-1) * exp(2*m + s^2)),
+                s))
+}
