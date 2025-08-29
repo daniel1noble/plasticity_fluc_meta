@@ -70,7 +70,7 @@ data <- data %>%
   )
 
 # Check conversions  
-# data  %>% filter(per_transform == "Yes")
+# data  %>% filter(per_transform == "Yes")  %>% select(Mean_T1_C, SD_Final_T1_C, Mean_T1_C_trans, SD_Final_T1_C_trans)
 # data  %>% filter(ln_transform == "Yes")
 
 #### Calculate Effect sizes ####
@@ -92,16 +92,14 @@ summary  <- data  %>% summarise(effects = n(), studies = length(unique(Study_ID)
 #### Phylogenetic matrix ####
 # Phylogenetic covariance matrix
             tree <- ape::read.tree("./Complex_tree")
-             phy <- ape::compute.brlen(tree, method = "Grafen", power = 1)
+
+# Phylo matrix prune
+
+            tree_overall  <- tree_checks(data, tree, dataCol = "phylo", type = "prune")
+            phy <- ape::compute.brlen(tree, method = "Grafen", power = 1)
                A <- ape::vcv.phylo(phy)
     row.names(A) <- colnames(A) <- row.names(A)
            A_cor <- ape::vcv.phylo(phy, corr = TRUE)
-
-# Phylo matrix prune
-        overall_Species <- data %>% select("phylo")
-        overall_A_cor <- as.data.frame(A_cor)
-        overall_A_cor <- overall_A_cor[overall_Species$phylo, overall_Species$phylo]
-        overall_A_cor <- as.matrix(overall_A_cor)
 
 # Periods used in different studies 
         sum_period <- data %>% 
