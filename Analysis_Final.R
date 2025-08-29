@@ -203,9 +203,9 @@ trunk.size = 1
 size = 24
 position = "topleft"
 
-density_orchard_overall <- orchard_plot(Overall_Model, group = "Study_ID", mod = "1", xlab = TeX(" Effect Size ($PRRD_{S}$)"), angle = 45, k = FALSE, g = FALSE, trunk.size = trunk.size) + ylim(-0.18, 0.18) + my_theme() + annotate('text',  x =1+0.1, y = 0.18, label= paste("italic(k)==", dim(data)[1], "~","(", length(unique(data$Study_ID)), ")"), parse = TRUE, hjust = "right", size = 6) + annotate('text', label= paste(format(round(mean(exp(Overall_Model_Estimates[1, "estimate"])-1)*100, 2), nsmall = 2), "%"), x = 1+0.1, y = -0.15, size = 6) + geom_hline(yintercept =  c(-0.2, -0.1, 0.1, 0.2), linetype = "dashed", colour = "gray80") + scale_x_discrete(labels = c("Intrcpt" = "Overall")) + scale_fill_manual(values = "gray") +  scale_colour_manual(values = "black")        
+density_orchard_overall <- orchard_plot(Overall_Model, group = "Study_ID", mod = "1", xlab = TeX(" Effect Size ($PRRD_{S}$)"), angle = 45, k = FALSE, g = FALSE, trunk.size = trunk.size) + ylim(-0.18, 0.18) + my_theme() + annotate('text',  x =1+0.1, y = 0.18, label= paste("italic(k)==", dim(data)[1], "~","(", length(unique(data$Study_ID)), ")"), parse = TRUE, hjust = "right", size = 6) + annotate('text', label= paste(format(round(mean(exp(Overall_Model_Estimates[1, "estimate"])-1)*100, 2), nsmall = 2), "%"), x = 1+0.1, y = -0.15, size = 6) + geom_hline(yintercept =  c(-0.2, -0.1, 0.1, 0.2), linetype = "dashed", colour = "gray80") + scale_x_discrete(labels = c("Intrcpt" = "Overall")) + scale_fill_manual(values = "gray") +  scale_colour_manual(values = "black") + annotate('text',  x = 1+0.09, y = -0.05, label = "*", size = 10)
         
-indivdual_orchard_overall <- orchard_plot(Individual_Model, group = "Study_ID", mod = "1", xlab = TeX(" Effect Size ($PRRD_{S}$)"), angle = 45, k = FALSE, g = FALSE, trunk.size = trunk.size) + ylim(-0.18, 0.18) + my_theme() + annotate('text',  x =1+0.1, y = 0.18,label= paste("italic(k)==", dim(Individual_Subset_Data)[1], "~","(", length(unique(Individual_Subset_Data$Study_ID)), ")"), parse = TRUE, hjust = "right", size = 6) + annotate('text', label= paste(format(round(mean(exp(Individual_Model_Estimates[1, "estimate"])-1)*100, 2), nsmall = 2), "%"),x = 1+0.1, y = -0.15, size = 6) + geom_hline(yintercept =  c(-0.2, -0.1, 0.1, 0.2), linetype = "dashed", colour = "gray80") + scale_x_discrete(labels = c("Intrcpt" = "Overall")) + scale_fill_manual(values = "gray") + scale_colour_manual(values = "black")
+indivdual_orchard_overall <- orchard_plot(Individual_Model, group = "Study_ID", mod = "1", xlab = TeX(" Effect Size ($PRRD_{S}$)"), angle = 45, k = FALSE, g = FALSE, trunk.size = trunk.size) + ylim(-0.18, 0.18) + my_theme() + annotate('text',  x =1+0.1, y = 0.18,label= paste("italic(k)==", dim(Individual_Subset_Data)[1], "~","(", length(unique(Individual_Subset_Data$Study_ID)), ")"), parse = TRUE, hjust = "right", size = 6) + annotate('text', label= paste(format(round(mean(exp(Individual_Model_Estimates[1, "estimate"])-1)*100, 2), nsmall = 2), "%"),x = 1+0.1, y = -0.15, size = 6) + geom_hline(yintercept =  c(-0.2, -0.1, 0.1, 0.2), linetype = "dashed", colour = "gray80") + scale_x_discrete(labels = c("Intrcpt" = "Overall")) + scale_fill_manual(values = "gray") + scale_colour_manual(values = "black") + annotate('text',  x = 1+0.09, y = -0.05, label = "*", size = 10)
 
 fig2 <- (density_orchard_overall + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic"))) / (indivdual_orchard_overall + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic"))) + plot_annotation(tag_levels = "a", tag_suffix = ")")
 
@@ -216,7 +216,10 @@ ggsave(filename = "./output/figs/fig2.png", plot = fig2, width = 6.7625, height 
 # Have a look at the data
 Trait_Exploration <- data %>% select("Trait_Category") %>% table() %>% data.frame()
 rownames(Trait_Exploration) <- Trait_Exploration$Trait_Category
-        
+
+# Need to recode Biochemical to Biochemical Assay
+data[data$Trait_Category == "Biochemical", "Trait_Category"] <- "Biochemical Assay"
+
 # Exclude some categories with low numbers of effects
         Trait_Data <- data %>% filter(Trait_Category != "Behavioural" &
                                         Trait_Category != "Gene Expression" &
@@ -369,19 +372,19 @@ trait_table <- data.frame(estimate = Trait_Model_Estimates[,"estimate"],
         trait_table$name <- row.names(trait_table)
         
 trait_raw_mean <- c(unlist(unname(Trait_Data %>% filter(`Trait_Category` == "Biochemical Assay") %>% 
-select("InRR_Transformed"))), unlist(unname(Trait_Data %>% filter(`Trait_Category` == "Life-History Traits") %>% 
-select("InRR_Transformed"))), unlist(unname(Trait_Data %>% filter(`Trait_Category` == "Morphology") %>% 
-select("InRR_Transformed"))), unlist(unname(Trait_Data %>% filter(`Trait_Category` == "Physiological") %>% 
-select("InRR_Transformed"))))
+select("PRRD"))), unlist(unname(Trait_Data %>% filter(`Trait_Category` == "Life-History Traits") %>% 
+select("PRRD"))), unlist(unname(Trait_Data %>% filter(`Trait_Category` == "Morphology") %>% 
+select("PRRD"))), unlist(unname(Trait_Data %>% filter(`Trait_Category` == "Physiological") %>% 
+select("PRRD"))))
 
 trait_raw_name <- c(replicate(32, "Biochemical Assay"), 
                     replicate(68, "Life-history Traits"), 
                     replicate(54, "Morphological"),
                     replicate(41, "Physiological"))
         
-trait_raw_df <- data.frame("Model" = trait_raw_name, 
-                          "Effect" = trait_raw_mean)
-               
+#trait_raw_df <- data.frame("Model" = trait_raw_name, 
+                         #"Effect" = trait_raw_mean)
+
 specific_trait_rnames <- c("Development Time", "Length", "Mass", "Metabolic Rate")
         
         specific_trait_k <- data.frame("k" = c(Specific_Trait_Exploration["Development Time", "Freq"], 
@@ -414,13 +417,13 @@ specific_trait_rnames <- c("Development Time", "Length", "Mass", "Metabolic Rate
         specific_trait_table$name <- row.names(specific_trait_table)
         
         specific_trait_raw_mean <- c(unlist(unname(Specific_Trait_Data %>% filter(`Measurement` == "Development Time") %>% 
-                                                     select("InRR_Transformed"))), 
+                                                     select("PRRD"))), 
                                      unlist(unname(Specific_Trait_Data %>% filter(`Measurement` == "Length") %>% 
-                                                     select("InRR_Transformed"))), 
+                                                     select("PRRD"))), 
                                      unlist(unname(Specific_Trait_Data %>% filter(`Measurement` == "Mass") %>% 
-                                                     select("InRR_Transformed"))), 
+                                                     select("PRRD"))), 
                                      unlist(unname(Specific_Trait_Data %>% filter(`Measurement` == "Metabolic Rate") %>% 
-                                                     select("InRR_Transformed"))))
+                                                     select("PRRD"))))
         
 specific_trait_raw_name <- c(replicate(46, "Development Time"), 
                                      replicate(14, "Length"), 
@@ -448,7 +451,7 @@ density_trait_orchard <- orchard_plot(Trait_Model, group = "Study_ID", mod = "Tr
             paste(format(round(mean(exp(Trait_Model_Estimates["Life-History Traits", "estimate"])-1)*100, 2), nsmall = 2), "%"),
             paste(format(round(mean(exp(Trait_Model_Estimates["Morphology", "estimate"])-1)*100, 2), nsmall = 2), "%"),
             paste(format(round(mean(exp(Trait_Model_Estimates["Physiological", "estimate"])-1)*100, 2), nsmall = 2), "%")), 
-            x = c(1,2,3,4)+0.25, y = -0.10, size = 6) + geom_hline(yintercept =  c(-0.2, -0.1, 0.1, 0.2), linetype = "dashed", colour = "gray80") +  scale_colour_manual(values = c("black", "black", "black", "black"))
+            x = c(1,2,3,4)+0.25, y = -0.10, size = 6) + geom_hline(yintercept =  c(-0.2, -0.1, 0.1, 0.2), linetype = "dashed", colour = "gray80") +  scale_colour_manual(values = c("black", "black", "black", "black")) + annotate('text',  x = 4+0.09, y = -0.05, label = "*", size = 10)
         
         
 density_specific_trait_orchard <- orchard_plot(Specific_Trait_Model, group = "Study_ID", mod = "Measurement", xlab = TeX(" Effect Size ($PRRD_{S}$)"), angle = 45, k = FALSE, g = FALSE, trunk.size = trunk.size, branch.size = branch.size) + ylim(-0.12, 0.12) + 
@@ -469,9 +472,9 @@ annotate('text', label=c(paste(format(round(mean(exp(Specific_Trait_Model_Estima
 size = 24
 position = "topleft"
 
-fig3 <- (density_trait_orchard + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic")) | density_specific_trait_orchard + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic"))) + plot_annotation(tag_levels = "a", tag_suffix = ")") 
+fig3 <- (density_trait_orchard + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic"))) / (density_specific_trait_orchard + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic"))) + plot_annotation(tag_levels = "a", tag_suffix = ")") 
         
-ggsave(filename = "./output/figs/fig3.png", fig3, width = 15, height =  7.4125)
+ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
         
 #### Overall Model - Invertebrate/Vertebrate Meta-Regression ####
         
