@@ -151,7 +151,7 @@ Complex_Data <- Complex_Data[, c("Effect_Size_ID", "Study_ID", "Species_ID", "Tr
 
 write.csv(Complex_Data, file = "./3.Data_Analysis/2.Outputs/Data/Complex_Final_Data.csv", row.names = FALSE)
 
-##### Creating Phylogeneitc Tree #####
+##### Creating Phylogenetic Tree #####
 # Build the tree:
 Myspecies <- str_sort(as.character(unique(Complex_Data$Scientific_Name)))
 Taxa <- tnrs_match_names(names = Myspecies, include_suppressed = TRUE)
