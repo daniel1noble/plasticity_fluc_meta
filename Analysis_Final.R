@@ -209,7 +209,7 @@ indivdual_orchard_overall <- orchard_plot(Individual_Model, group = "Study_ID", 
 
 fig2 <- (density_orchard_overall + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic"))) / (indivdual_orchard_overall + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic"))) + plot_annotation(tag_levels = "a", tag_suffix = ")")
 
-ggsave(filename = "./output/figs/fig2.png", plot = fig2, width = 12, height =  5.8)
+ggsave(filename = "./output/figs/fig2.png", plot = fig2, width = 6.7625, height =  10.4375)
 
 #### Overall Model - Trait Meta-Regression ####
         
