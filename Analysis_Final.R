@@ -22,7 +22,7 @@
                                                              legend.position = "top",
                                                              plot.tag = element_text(size = 16, face = "italic")))
 }
-  
+
 # Importing Data Set
                     data <- read.csv("./Complexity_Final_Data.csv")
                 data$obs <- 1:nrow(data)
@@ -86,8 +86,26 @@ data <- data %>%
                                sd_t1_c = SD_Final_T1_C_trans, sd_t2_c=  SD_Final_T2_C_trans, sd_t1_f = SD_Final_T1_F_trans, sd_t2_f = SD_Final_T2_F_trans,
                                n_t1_c =  n_T1_C, n_t2_c = n_T2_C, n_t1_f = n_T1_F, n_t2_f = n_T2_F, type = 'v'))
 
+# Fix up a species name in data # Replace species name with synonymn
+data[data$phylo == "Inachis_io", "phylo"] <- "Aglais_io"
+data[data$Scientific_Name == "Inachis_io", "Scientific_Name"] <- "Aglais_io"
+
 # summarise study, species and effects
 summary  <- data  %>% summarise(effects = n(), studies = length(unique(Study_ID)), species = length(unique(Scientific_Name)))
+
+##### Creating Phylogenetic Tree #####
+# Build the tree:
+Myspecies <- str_sort(as.character(unique(data$phylo)))
+
+Taxa <- tnrs_match_names(names = Myspecies, include_suppressed = TRUE)
+tree <- tol_induced_subtree(ott_ids = Taxa[["ott_id"]], label_format = "name")
+
+# Resolving polytomies at random
+binary.tree <- multi2di(tree, random=T)
+plot(binary.tree, node.color = "#183357")
+
+# Exporting Tree
+write.tree(binary.tree, "./Complex_tree")
 
 #### Phylogenetic matrix ####
 # Phylogenetic covariance matrix
@@ -95,7 +113,7 @@ summary  <- data  %>% summarise(effects = n(), studies = length(unique(Study_ID)
 
 # Phylo matrix prune
 
-            tree_overall  <- tree_checks(data, tree, dataCol = "phylo", type = "prune")
+            tree_overall  <- tree_checks(data, tree, dataCol = "phylo", type = "checks")
             phy <- ape::compute.brlen(tree, method = "Grafen", power = 1)
                A <- ape::vcv.phylo(phy)
     row.names(A) <- colnames(A) <- row.names(A)
@@ -187,9 +205,9 @@ position = "topleft"
 
 density_orchard_overall <- orchard_plot(Overall_Model, group = "Study_ID", mod = "1", xlab = TeX(" Effect Size ($PRRD_{S}$)"), angle = 45, k = FALSE, g = FALSE, trunk.size = trunk.size) + ylim(-0.18, 0.18) + my_theme() + annotate('text',  x =1+0.1, y = 0.18, label= paste("italic(k)==", dim(data)[1], "~","(", length(unique(data$Study_ID)), ")"), parse = TRUE, hjust = "right", size = 6) + annotate('text', label= paste(format(round(mean(exp(Overall_Model_Estimates[1, "estimate"])-1)*100, 2), nsmall = 2), "%"), x = 1+0.1, y = -0.15, size = 6) + geom_hline(yintercept =  c(-0.2, -0.1, 0.1, 0.2), linetype = "dashed", colour = "gray80") + scale_x_discrete(labels = c("Intrcpt" = "Overall")) + scale_fill_manual(values = "gray") +  scale_colour_manual(values = "black")        
         
-indivdual_orchard_overall <- orchard_plot(Individual_Model, group = "Study_ID", mod = "1", xlab = TeX(" Effect Size ($PRRD_{S}$)"), angle = 45, k = FALSE, g = FALSE, trunk.size = trunk.size) + ylim(-0.18, 0.18) + my_theme() + annotate('text',  x =1+0.1, y = 0.18,label= paste("italic(k)==", dim(Individual_Subset_Data)[1], "~","(", length(unique(Individual_Subset_Data$Study_ID)), ")"), parse = TRUE, hjust = "right", size = 6) + annotate('text', label= paste(format(round(mean(exp(Individual_Model_Estimates[1, "estimate"])-1)*100, 2), nsmall = 2), "%"),x = 1+0.1, y = -0.15, size = 6) + geom_hline(yintercept =  c(-0.2, -0.1, 0.1, 0.2), linetype = "dashed", colour = "gray80") + scale_x_discrete(labels = c("Intrcpt" = "")) + scale_fill_manual(values = "gray") + scale_colour_manual(values = "black")
+indivdual_orchard_overall <- orchard_plot(Individual_Model, group = "Study_ID", mod = "1", xlab = TeX(" Effect Size ($PRRD_{S}$)"), angle = 45, k = FALSE, g = FALSE, trunk.size = trunk.size) + ylim(-0.18, 0.18) + my_theme() + annotate('text',  x =1+0.1, y = 0.18,label= paste("italic(k)==", dim(Individual_Subset_Data)[1], "~","(", length(unique(Individual_Subset_Data$Study_ID)), ")"), parse = TRUE, hjust = "right", size = 6) + annotate('text', label= paste(format(round(mean(exp(Individual_Model_Estimates[1, "estimate"])-1)*100, 2), nsmall = 2), "%"),x = 1+0.1, y = -0.15, size = 6) + geom_hline(yintercept =  c(-0.2, -0.1, 0.1, 0.2), linetype = "dashed", colour = "gray80") + scale_x_discrete(labels = c("Intrcpt" = "Overall")) + scale_fill_manual(values = "gray") + scale_colour_manual(values = "black")
 
-fig2 <- (density_orchard_overall + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic")) / indivdual_orchard_overall + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic")) ) + plot_annotation(tag_levels = "a", tag_suffix = ")")
+fig2 <- (density_orchard_overall + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic"))) / (indivdual_orchard_overall + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic"))) + plot_annotation(tag_levels = "a", tag_suffix = ")")
 
 ggsave(filename = "./output/figs/fig2.png", plot = fig2, width = 12, height =  5.8)
 
