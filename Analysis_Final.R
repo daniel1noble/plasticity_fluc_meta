@@ -370,20 +370,7 @@ trait_table <- data.frame(estimate = Trait_Model_Estimates[,"estimate"],
                                   group_no = trait_group_no[,1], 
                                   row.names = trait_rnames)
         trait_table$name <- row.names(trait_table)
-        
-trait_raw_mean <- c(unlist(unname(Trait_Data %>% filter(`Trait_Category` == "Biochemical Assay") %>% 
-select("PRRD"))), unlist(unname(Trait_Data %>% filter(`Trait_Category` == "Life-History Traits") %>% 
-select("PRRD"))), unlist(unname(Trait_Data %>% filter(`Trait_Category` == "Morphology") %>% 
-select("PRRD"))), unlist(unname(Trait_Data %>% filter(`Trait_Category` == "Physiological") %>% 
-select("PRRD"))))
 
-trait_raw_name <- c(replicate(32, "Biochemical Assay"), 
-                    replicate(68, "Life-history Traits"), 
-                    replicate(54, "Morphological"),
-                    replicate(41, "Physiological"))
-        
-#trait_raw_df <- data.frame("Model" = trait_raw_name, 
-                         #"Effect" = trait_raw_mean)
 
 specific_trait_rnames <- c("Development Time", "Length", "Mass", "Metabolic Rate")
         
@@ -415,24 +402,7 @@ specific_trait_rnames <- c("Development Time", "Length", "Mass", "Metabolic Rate
                                            group_no = specific_trait_group_no[,1], 
                                            row.names = specific_trait_rnames)
         specific_trait_table$name <- row.names(specific_trait_table)
-        
-        specific_trait_raw_mean <- c(unlist(unname(Specific_Trait_Data %>% filter(`Measurement` == "Development Time") %>% 
-                                                     select("PRRD"))), 
-                                     unlist(unname(Specific_Trait_Data %>% filter(`Measurement` == "Length") %>% 
-                                                     select("PRRD"))), 
-                                     unlist(unname(Specific_Trait_Data %>% filter(`Measurement` == "Mass") %>% 
-                                                     select("PRRD"))), 
-                                     unlist(unname(Specific_Trait_Data %>% filter(`Measurement` == "Metabolic Rate") %>% 
-                                                     select("PRRD"))))
-        
-specific_trait_raw_name <- c(replicate(46, "Development Time"), 
-                                     replicate(14, "Length"), 
-                                     replicate(25, "Mass"), 
-                                     replicate(12, "Metabolic Rate"))
-        
-specific_trait_raw_df <- data.frame("Model" = specific_trait_raw_name, 
-                                            "Effect" = specific_trait_raw_mean)
-        
+
 trunk.size = 1
 branch.size = 1.5
 density_trait_orchard <- orchard_plot(Trait_Model, group = "Study_ID", mod = "Trait_Category", xlab = TeX(" Effect Size ($PRRD_{S}$)"), angle = 45, k = FALSE, g = FALSE, trunk.size = trunk.size, branch.size = branch.size) + ylim(-0.18, 0.18) + 
@@ -451,7 +421,7 @@ density_trait_orchard <- orchard_plot(Trait_Model, group = "Study_ID", mod = "Tr
             paste(format(round(mean(exp(Trait_Model_Estimates["Life-History Traits", "estimate"])-1)*100, 2), nsmall = 2), "%"),
             paste(format(round(mean(exp(Trait_Model_Estimates["Morphology", "estimate"])-1)*100, 2), nsmall = 2), "%"),
             paste(format(round(mean(exp(Trait_Model_Estimates["Physiological", "estimate"])-1)*100, 2), nsmall = 2), "%")), 
-            x = c(1,2,3,4)+0.25, y = -0.10, size = 6) + geom_hline(yintercept =  c(-0.2, -0.1, 0.1, 0.2), linetype = "dashed", colour = "gray80") +  scale_colour_manual(values = c("black", "black", "black", "black")) + annotate('text',  x = 4+0.09, y = -0.05, label = "*", size = 10)
+            x = c(1,2,3,4)+0.25, y = -0.10, size = 6) + geom_hline(yintercept =  c(-0.2, -0.1, 0.1, 0.2), linetype = "dashed", colour = "gray80") +  scale_colour_manual(values = c("black", "black", "black", "black")) + annotate('text',  x = 4+0.25, y = -0.05, label = "*", size = 10)
         
         
 density_specific_trait_orchard <- orchard_plot(Specific_Trait_Model, group = "Study_ID", mod = "Measurement", xlab = TeX(" Effect Size ($PRRD_{S}$)"), angle = 45, k = FALSE, g = FALSE, trunk.size = trunk.size, branch.size = branch.size) + ylim(-0.12, 0.12) + 
