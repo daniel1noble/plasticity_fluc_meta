@@ -575,9 +575,9 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
         
         size = 24
         position = "topleft"
-        fig4 <- (density_habitat_orchard + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic")) | density_vert_invert_orchard + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic"))) + plot_annotation(tag_levels = "a", tag_suffix = ")") 
-        
-        ggsave(filename = "./output/figs/fig4.png", fig4, width =14, height =  6)
+        fig4 <- (density_habitat_orchard + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic"))) / (density_vert_invert_orchard + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic"))) + plot_annotation(tag_levels = "a", tag_suffix = ")")
+
+        ggsave(filename = "./output/figs/fig4.png", fig4, width =8.7375, height =  12.8875)
         
         
         
@@ -611,7 +611,14 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
 #### Overall Model - Type of Fluctuation Meta-Regression ####     
        # Filter missing data
           Fluctuation_Data <- data %>% filter(!is.na(Fluctuation_Category))
-        
+
+       # Fix naming
+       Fluctuation_Data <- Fluctuation_Data %>% 
+         mutate(Fluctuation_Category = recode(Fluctuation_Category, 
+                                              "Sinusoidal" = "Sinusoidal (Sine Curve)", 
+                                              "Alternating" = "Alternating", 
+                                              "Stepwise" = "Stepwise"))
+
        # Have a look at breakdown
           Fluctuation_Exploration <- Fluctuation_Data %>% 
                                       select("Fluctuation_Category") %>% 
@@ -701,20 +708,7 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
                                       row.names = fluctuation_rnames)
       fluctuation_table$name <- row.names(fluctuation_table)
       
-      fluctuation_raw_mean <- c(unlist(unname(Fluctuation_Data %>% filter(`Fluctuation_Category` == "Sinusoidal (Sine Curve)") %>% 
-                                                select("InRR_Transformed"))), 
-                                unlist(unname(Fluctuation_Data %>% filter(`Fluctuation_Category` == "Alternating") %>% 
-                                                select("InRR_Transformed"))), 
-                                unlist(unname(Fluctuation_Data %>% filter(`Fluctuation_Category` == "Stepwise") %>% 
-                                                select("InRR_Transformed"))))
-      
-      fluctuation_raw_name <- c(replicate(80, "Sinusoidal (Sine Curve)"), 
-                                replicate(54, "Alternating"), 
-                                replicate(48, "Stepwise"))
-      
-      fluctuation_raw_df <- data.frame("Model" = fluctuation_raw_name, 
-                                       "Effect" = fluctuation_raw_mean)
-      
+    
       trunk.size = 1
       branch.size = 1.5
       density_fluctuation_orchard <- orchard_plot(Fluctuation_Model, group = "Study_ID", mod = "Fluctuation_Category", xlab = TeX(" Effect Size ($PRRD_{S}$)"), angle = 45, k = FALSE, g = FALSE, trunk.size = trunk.size, branch.size = branch.size) + ylim(-0.18, 0.20)  + 
