@@ -45,6 +45,19 @@ data <- data %>%
            SD_Final_T1_F == 0 | SD_Final_T2_F == 0))
 
 
+## Check directions of slopes just to get a breakdown of what kind of conditions we have for PRRD. 
+
+directions <- data  %>%  mutate(lnRR1 = log(Mean_T2_C / Mean_T1_C),
+                                lnRR2 = log(Mean_T2_F / Mean_T1_F),
+                                direction1 = ifelse(lnRR1 > 0, "Positive", "Negative"),
+                                direction2 = ifelse(lnRR2 > 0, "Positive", "Negative"),
+                                combined  = ifelse(direction1 == "Positive" & direction2 == "Positive", "Positive",
+                                  ifelse(direction1 == "Negative" & direction2 == "Negative", 
+                                  "Negative", "opposite")))
+
+# Summarise                                  
+directions  %>% tabyl(combined)
+
 #### Conversions ####
 
 # Convert from percentage to proportion for subset of data
