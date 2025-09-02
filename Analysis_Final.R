@@ -58,6 +58,11 @@ directions <- data  %>%  mutate(lnRR1 = log(Mean_T2_C / Mean_T1_C),
 # Summarise                                  
 directions  %>% tabyl(combined)
 
+# Check that all temperatures are set up correctly. Remember, we subtract T2 from T1 and T2 is the higher temp
+    temp_directions <- data  %>% 
+    mutate(check = ifelse((T2_constant > T1_constant) | (T2_fluctuation > T1_fluctuation), "OK", "Check"))
+    write.csv(temp_directions %>% filter(check == "Check"), "temp_directions_check.csv")
+
 #### Conversions ####
 
 # Convert from percentage to proportion for subset of data
