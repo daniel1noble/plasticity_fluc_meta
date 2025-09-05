@@ -115,7 +115,7 @@ data <- data %>%
                           ifelse(combined == "Positive", meaning_pos, meaning_opps)),
              PRRD_cor = ifelse(meaning == "Steeper in C" & combined == "Negative", PRRD*-1, 
                           if_else(meaning == "Steeper in F" & combined == "Negative", abs(PRRD), 
-                            if_else((abs(lnRR1) > abs(lnRR2)) & combined == "opposite", PRRD, PRRD*-1)))) 
+                            if_else((combined == "opposite") & (abs(lnRR1) > abs(lnRR2)) & (PRRD < 0), PRRD, PRRD*-1)))) 
 
 write.csv(data, "directions_check.csv")
 
