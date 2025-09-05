@@ -45,23 +45,10 @@ data <- data %>%
            SD_Final_T1_F == 0 | SD_Final_T2_F == 0))
 
 
-## Check directions of slopes just to get a breakdown of what kind of conditions we have for PRRD. 
-
-directions <- data  %>%  mutate(lnRR1 = log(Mean_T2_C / Mean_T1_C),
-                                lnRR2 = log(Mean_T2_F / Mean_T1_F),
-                                direction1 = ifelse(lnRR1 > 0, "Positive", "Negative"),
-                                direction2 = ifelse(lnRR2 > 0, "Positive", "Negative"),
-                                combined  = ifelse(direction1 == "Positive" & direction2 == "Positive", "Positive",
-                                  ifelse(direction1 == "Negative" & direction2 == "Negative", 
-                                  "Negative", "opposite")))
-
-# Summarise                                  
-directions  %>% tabyl(combined)
 
 # Check that all temperatures are set up correctly. Remember, we subtract T2 from T1 and T2 is the higher temp
     temp_directions <- data  %>% 
     mutate(check = ifelse((T2_constant > T1_constant) | (T2_fluctuation > T1_fluctuation), "OK", "Check"))
-    write.csv(temp_directions %>% filter(check == "Check"), "temp_directions_check.csv")
 
 #### Conversions ####
 
@@ -103,6 +90,34 @@ data <- data %>%
                                t1_c = Mean_T1_C_trans, t2_c = Mean_T2_C_trans, t1_f = Mean_T1_F_trans, t2_f = Mean_T2_F_trans,
                                sd_t1_c = SD_Final_T1_C_trans, sd_t2_c=  SD_Final_T2_C_trans, sd_t1_f = SD_Final_T1_F_trans, sd_t2_f = SD_Final_T2_F_trans,
                                n_t1_c =  n_T1_C, n_t2_c = n_T2_C, n_t1_f = n_T1_F, n_t2_f = n_T2_F, type = 'v'))
+
+
+## Check directions of slopes just to get a breakdown of what kind of conditions we have for PRRD. 
+
+data <- data  %>%  mutate(lnRR1 = log(Mean_T2_C / Mean_T1_C),
+                                lnRR2 = log(Mean_T2_F / Mean_T1_F),
+                                direction1 = ifelse(lnRR1 > 0, "Positive", "Negative"),
+                                direction2 = ifelse(lnRR2 > 0, "Positive", "Negative"),
+                                combined  = ifelse(direction1 == "Positive" & direction2 == "Positive", "Positive",
+                                  ifelse(direction1 == "Negative" & direction2 == "Negative", 
+                                  "Negative", "opposite")))
+
+# Summarise                                  
+data  %>% tabyl(combined)
+
+# We now need to check that all directions are set up correctly. This depends on whether the slopes are negative, positive or opposite. If negative, a more negative slope is 'steeper'. If positive, a more positive slope is 'steeper'. If slopes are opposite, we need to check the absolute values.
+
+data <- data %>%
+  mutate(meaning_negs = ifelse((combined == "Negative") & (lnRR1 < lnRR2), "Steeper in C", "Steeper in F"),
+          meaning_pos = ifelse((combined == "Positive") & (lnRR1 > lnRR2), "Steeper in C", "Steeper in F"),
+         meaning_opps = ifelse((combined == "opposite") & (abs(lnRR1) > abs(lnRR2)), "Steeper in C", "Steeper in F"),
+         meaning = ifelse(combined == "Negative", meaning_negs,
+                          ifelse(combined == "Positive", meaning_pos, meaning_opps)),
+        PRRD_cor = ifelse(meaning == "Steeper in C" & combined== "Negative", PRRD*-1, 
+                          if_else(meaning == "Steeper in F" & combined== "Negative", abs(PRRD), 
+                            if_else(meaning == "Steeper in F" & combined== "opposite", PRRD*-1, PRRD)))) 
+
+write.csv(data, "directions_check.csv")
 
 # Fix up a species name in data # Replace species name with synonymn
 data[data$phylo == "Inachis_io", "phylo"] <- "Aglais_io"
