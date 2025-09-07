@@ -44,11 +44,10 @@ data <- data %>%
            SD_Final_T1_C == 0 | SD_Final_T2_C == 0 | 
            SD_Final_T1_F == 0 | SD_Final_T2_F == 0))
 
-
-
 # Check that all temperatures are set up correctly. Remember, we subtract T2 from T1 and T2 is the higher temp
     temp_directions <- data  %>% 
     mutate(check = ifelse((T2_constant > T1_constant) | (T2_fluctuation > T1_fluctuation), "OK", "Check"))
+    all(temp_directions$check == "OK")
 
 #### Conversions ####
 
@@ -118,11 +117,17 @@ data <- data %>%
                             if_else((combined == "opposite") & (abs(lnRR1) > abs(lnRR2)) & (PRRD < 0), PRRD,   PRRD*-1))),
             PRRD_cor = ifelse(meaning == "Steeper in F" & lnRR2 > 0, PRRD_cor1*-1, PRRD_cor1))
 
-write.csv(data, "directions_check.csv")
 
 # Fix up a species name in data # Replace species name with synonymn
 data[data$phylo == "Inachis_io", "phylo"] <- "Aglais_io"
 data[data$Scientific_Name == "Inachis_io", "Scientific_Name"] <- "Aglais_io"
+
+# Fix up new data spelling in plasticity mechanisms. Should be development not developmental plasticity
+data[data$Plasticity_Mechanism == "Developmental Plasticity", "Plasticity_Mechanism"] <- "Development"
+
+# Clean up and Write the data
+data <- data %>% select(-c(direction1, direction2, meaning_negs, meaning_pos, meaning_opps, PRRD_cor1, Effect_Size_ID))
+write.csv(data, "./output/data/data_final.csv", row.names = FALSE)
 
 # summarise study, species and effects
 summary  <- data  %>% summarise(effects = n(), studies = length(unique(Study_ID)), species = length(unique(Scientific_Name)))
@@ -161,12 +166,11 @@ write.tree(binary.tree, "./Complex_tree")
 # Variance Matrix (Shared Control)
   VCV <- make_VCV_matrix(data, V = "v_PRRD", cluster = "Shared_Control_Number")
   
-  
 ##### Overall Model #####
   run <- TRUE
   system.time(
     if(run){
-      Overall_Model <- metafor::rma.mv(PRRD ~ 1, V = VCV, test = "t", 
+      Overall_Model <- metafor::rma.mv(PRRD_cor ~ 1, V = VCV, test = "t", 
                                         random = list(~1|phylo, 
                                                      ~1|Study_ID, 
                                                      ~1|obs, 
@@ -210,7 +214,7 @@ write.tree(binary.tree, "./Complex_tree")
         run <- TRUE
         system.time(
           if(run){
-            Individual_Model <- metafor::rma.mv(PRRD ~ 1, V = Individual_VCV, test = "t", 
+            Individual_Model <- metafor::rma.mv(PRRD_cor ~ 1, V = Individual_VCV, test = "t", 
                                                 random = list(~1|phylo, 
                                                               ~1|Study_ID, 
                                                               ~1|obs, 
@@ -237,9 +241,9 @@ trunk.size = 1
 size = 24
 position = "topleft"
 
-density_orchard_overall <- orchard_plot(Overall_Model, group = "Study_ID", mod = "1", xlab = TeX(" Effect Size ($PRRD_{S}$)"), angle = 45, k = FALSE, g = FALSE, trunk.size = trunk.size) + ylim(-0.18, 0.18) + my_theme() + annotate('text',  x =1+0.1, y = 0.18, label= paste("italic(k)==", dim(data)[1], "~","(", length(unique(data$Study_ID)), ")"), parse = TRUE, hjust = "right", size = 6) + annotate('text', label= paste(format(round(mean(exp(Overall_Model_Estimates[1, "estimate"])-1)*100, 2), nsmall = 2), "%"), x = 1+0.1, y = -0.15, size = 6) + geom_hline(yintercept =  c(-0.2, -0.1, 0.1, 0.2), linetype = "dashed", colour = "gray80") + scale_x_discrete(labels = c("Intrcpt" = "Overall")) + scale_fill_manual(values = "gray") +  scale_colour_manual(values = "black") + annotate('text',  x = 1+0.09, y = -0.05, label = "*", size = 10)
+density_orchard_overall <- orchard_plot(Overall_Model, group = "Study_ID", mod = "1", xlab = TeX(" Effect Size ($PRRD_{S}$)"), angle = 45, k = FALSE, g = FALSE, trunk.size = trunk.size) + ylim(-0.18, 0.18) + my_theme() + annotate('text',  x =1+0.1, y = 0.18, label= paste("italic(k)==", dim(data)[1], "~","(", length(unique(data$Study_ID)), ")"), parse = TRUE, hjust = "right", size = 6) + annotate('text', label= paste(format(round(mean(exp(Overall_Model_Estimates[1, "estimate"])-1)*100, 2), nsmall = 2), "%"), x = 1+0.1, y = -0.15, size = 6) + geom_hline(yintercept =  c(-0.2, -0.1, 0.1, 0.2), linetype = "dashed", colour = "gray80") + scale_x_discrete(labels = c("Intrcpt" = "Overall")) + scale_fill_manual(values = "gray") +  scale_colour_manual(values = "black") 
         
-indivdual_orchard_overall <- orchard_plot(Individual_Model, group = "Study_ID", mod = "1", xlab = TeX(" Effect Size ($PRRD_{S}$)"), angle = 45, k = FALSE, g = FALSE, trunk.size = trunk.size) + ylim(-0.18, 0.18) + my_theme() + annotate('text',  x =1+0.1, y = 0.18,label= paste("italic(k)==", dim(Individual_Subset_Data)[1], "~","(", length(unique(Individual_Subset_Data$Study_ID)), ")"), parse = TRUE, hjust = "right", size = 6) + annotate('text', label= paste(format(round(mean(exp(Individual_Model_Estimates[1, "estimate"])-1)*100, 2), nsmall = 2), "%"),x = 1+0.1, y = -0.15, size = 6) + geom_hline(yintercept =  c(-0.2, -0.1, 0.1, 0.2), linetype = "dashed", colour = "gray80") + scale_x_discrete(labels = c("Intrcpt" = "Overall")) + scale_fill_manual(values = "gray") + scale_colour_manual(values = "black") + annotate('text',  x = 1+0.09, y = -0.05, label = "*", size = 10)
+indivdual_orchard_overall <- orchard_plot(Individual_Model, group = "Study_ID", mod = "1", xlab = TeX(" Effect Size ($PRRD_{S}$)"), angle = 45, k = FALSE, g = FALSE, trunk.size = trunk.size) + ylim(-0.18, 0.18) + my_theme() + annotate('text',  x =1+0.1, y = 0.18,label= paste("italic(k)==", dim(Individual_Subset_Data)[1], "~","(", length(unique(Individual_Subset_Data$Study_ID)), ")"), parse = TRUE, hjust = "right", size = 6) + annotate('text', label= paste(format(round(mean(exp(Individual_Model_Estimates[1, "estimate"])-1)*100, 2), nsmall = 2), "%"),x = 1+0.1, y = -0.15, size = 6) + geom_hline(yintercept =  c(-0.2, -0.1, 0.1, 0.2), linetype = "dashed", colour = "gray80") + scale_x_discrete(labels = c("Intrcpt" = "Overall")) + scale_fill_manual(values = "gray") + scale_colour_manual(values = "black") #+ annotate('text',  x = 1+0.09, y = -0.05, label = "*", size = 10)
 
 fig2 <- (density_orchard_overall + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic"))) / (indivdual_orchard_overall + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic"))) + plot_annotation(tag_levels = "a", tag_suffix = ")")
 
@@ -280,7 +284,7 @@ Trait_VCV <- make_VCV_matrix(Trait_Data, V = "v_PRRD", cluster = "Shared_Control
 run <- TRUE
 system.time(
           if(run){
-            Trait_Model <- metafor::rma.mv(PRRD, V = Trait_VCV, test = "t", 
+            Trait_Model <- metafor::rma.mv(PRRD_cor, V = Trait_VCV, test = "t", 
                                            mods = ~ Trait_Category - 1,
                                            random = list(~1|phylo, 
                                                          ~1|Study_ID, 
@@ -345,7 +349,7 @@ Trait_Model_Estimates <- data.frame(Category = substr(row.names(Trait_Model$b), 
         run <- TRUE
         system.time(
           if(run){
-            Specific_Trait_Model <- metafor::rma.mv(PRRD, V = Specific_Trait_VCV, test = "t", 
+            Specific_Trait_Model <- metafor::rma.mv(PRRD_cor, V = Specific_Trait_VCV, test = "t", 
                                                     mods = ~ Measurement - 1,
                                                     random = list(~1|phylo, 
                                                                   ~1|Study_ID, 
@@ -455,7 +459,7 @@ density_trait_orchard <- orchard_plot(Trait_Model, group = "Study_ID", mod = "Tr
             paste(format(round(mean(exp(Trait_Model_Estimates["Life-History Traits", "estimate"])-1)*100, 2), nsmall = 2), "%"),
             paste(format(round(mean(exp(Trait_Model_Estimates["Morphology", "estimate"])-1)*100, 2), nsmall = 2), "%"),
             paste(format(round(mean(exp(Trait_Model_Estimates["Physiological", "estimate"])-1)*100, 2), nsmall = 2), "%")), 
-            x = c(1,2,3,4)+0.25, y = -0.10, size = 6) + geom_hline(yintercept =  c(-0.2, -0.1, 0.1, 0.2), linetype = "dashed", colour = "gray80") +  scale_colour_manual(values = c("black", "black", "black", "black")) + annotate('text',  x = 4+0.25, y = -0.05, label = "*", size = 10)
+            x = c(1,2,3,4)+0.25, y = -0.10, size = 6) + geom_hline(yintercept =  c(-0.2, -0.1, 0.1, 0.2), linetype = "dashed", colour = "gray80") +  scale_colour_manual(values = c("black", "black", "black", "black")) 
         
         
 density_specific_trait_orchard <- orchard_plot(Specific_Trait_Model, group = "Study_ID", mod = "Measurement", xlab = TeX(" Effect Size ($PRRD_{S}$)"), angle = 45, k = FALSE, g = FALSE, trunk.size = trunk.size, branch.size = branch.size) + ylim(-0.12, 0.12) + 
@@ -471,8 +475,8 @@ specific_trait_table["Metabolic Rate", "group_no"]), ")"), parse = TRUE, hjust =
 annotate('text', label=c(paste(format(round(mean(exp(Specific_Trait_Model_Estimates["Development Time", "estimate"])-1)*100, 2), nsmall = 2), "%"), paste(format(round(mean(exp(Specific_Trait_Model_Estimates["Length", "estimate"])-1)*100, 2), nsmall = 2), "%"),
                                    paste(format(round(mean(exp(Specific_Trait_Model_Estimates["Mass", "estimate"])-1)*100, 2), nsmall = 2), "%"),
                                    paste(format(round(mean(exp(Specific_Trait_Model_Estimates["Metabolic Rate", "estimate"])-1)*100, 2), nsmall = 2), "%")), 
-                   x = c(1,2,3,4)+0.25, y = -0.08, size = 6) + geom_hline(yintercept =  c(-0.2, -0.1, 0.1, 0.2), linetype = "dashed", colour = "gray80") + annotate('text',  x = c(1,3)+0.25, y = -0.025, label = "*", size = 10) +  scale_colour_manual(values = c("black", "black", "black", "black"))
-        
+                   x = c(1,2,3,4)+0.25, y = -0.08, size = 6) + geom_hline(yintercept =  c(-0.2, -0.1, 0.1, 0.2), linetype = "dashed", colour = "gray80") + annotate('text',  x = c(1)+0.25, y = -0.025, label = c("*"), size = 10) +  scale_colour_manual(values = c("black", "black", "black", "black"))
+
 size = 24
 position = "topleft"
 
@@ -490,7 +494,7 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
         run <- TRUE
         system.time(
           if(run){
-            vert_invert_Model <- metafor::rma.mv(PRRD ~ vert_invert-1, V = VCV, test = "t", 
+            vert_invert_Model <- metafor::rma.mv(PRRD_cor ~ vert_invert-1, V = VCV, test = "t", 
                                                  random = list(~1|phylo, 
                                                                ~1|Study_ID, 
                                                                ~1|obs, 
@@ -521,7 +525,7 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
         run <- TRUE
         system.time(
           if(run){
-            habitat_Model <- metafor::rma.mv(PRRD ~ Ecosystem-1, V = VCV, test = "t", 
+            habitat_Model <- metafor::rma.mv(PRRD_cor ~ Ecosystem-1, V = VCV, test = "t", 
                                              random = list(~1|phylo, 
                                                            ~1|Study_ID, 
                                                            ~1|obs, 
@@ -619,7 +623,7 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
         run <- TRUE
         system.time(
           if(run){
-            Amplitude_Model <- metafor::rma.mv(PRRD, V = VCV, test = "t", 
+            Amplitude_Model <- metafor::rma.mv(PRRD_cor, V = VCV, test = "t", 
                                                mods = ~ Fluctuation_Magnitude,
                                                random = list(~1|phylo, 
                                                              ~1|Study_ID, 
@@ -687,7 +691,7 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
         run <- TRUE
         system.time(
           if(run){
-            Fluctuation_Model <- metafor::rma.mv(PRRD, V = Fluctuation_VCV, test = "t", 
+            Fluctuation_Model <- metafor::rma.mv(PRRD_cor, V = Fluctuation_VCV, test = "t", 
                                                  mods = ~ Fluctuation_Category-1,
                                                  random = list(~1|phylo, 
                                                                ~1|Study_ID, 
@@ -782,7 +786,7 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
       run <- TRUE
       system.time(
         if(run){
-          PlasticityMechanism_Model <- metafor::rma.mv(PRRD, V = Individual_VCV, test = "t", 
+          PlasticityMechanism_Model <- metafor::rma.mv(PRRD_cor, V = Individual_VCV, test = "t", 
                                                        mods = ~ Plasticity_Mechanism - 1,
                                                        random = list(~1|phylo, 
                                                                      ~1|Study_ID, 
@@ -823,12 +827,12 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
         my_theme() + 
         annotate('text',  x = c(1,2)+0.25, y = 0.20,
                  label= paste("italic(k)==", c(plasticity_mechanism_dat["Acclimation", "k"],
-                                               plasticity_mechanism_dat["Developmental Plasticity", "k"]), "~","(", 
+                                               plasticity_mechanism_dat["Development", "k"]), "~","(", 
                               c(plasticity_mechanism_dat["Acclimation", "group_no"],
-                                plasticity_mechanism_dat["Developmental Plasticity", "group_no"]), ")"), parse = TRUE, hjust = "right", size = 6) +
+                                plasticity_mechanism_dat["Development", "group_no"]), ")"), parse = TRUE, hjust = "right", size = 6) +
         annotate('text', 
                  label=c(paste(format(round(mean(exp(plasticity_mechanism_dat["Acclimation", "estimate"])-1)*100, 2), nsmall = 2), "%"), 
-                         paste(format(round(mean(exp(plasticity_mechanism_dat["Developmental Plasticity", "estimate"])-1)*100, 2), nsmall = 2), "%")), x = c(1,2)+0.25, y = -0.1, size = 6) + 
+                         paste(format(round(mean(exp(plasticity_mechanism_dat["Development", "estimate"])-1)*100, 2), nsmall = 2), "%")), x = c(1,2)+0.25, y = -0.1, size = 6) + 
         geom_hline(yintercept =  c(-0.2, -0.1, 0.1, 0.2), linetype = "dashed", colour = "gray80") + scale_x_discrete(labels = c("Developmental Plasticity" = "Development")) + scale_colour_manual(values = c("black", "black", "black")) + scale_fill_manual(values=c("#453781FF", "#287D8EFF"))
       
       ggsave(filename = "./output/figs/fig6.png", density_plasticiyMechanism_orchard, width = 7, height =  5)
@@ -837,7 +841,7 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
       run <- TRUE
       system.time(
         if(run){
-          Individual_Amplitude_Model <- metafor::rma.mv(PRRD, V = Individual_VCV, test = "t", 
+          Individual_Amplitude_Model <- metafor::rma.mv(PRRD_cor, V = Individual_VCV, test = "t", 
                                                         mods = ~ Fluctuation_Magnitude,
                                                         random = list(~1|phylo, 
                                                                       ~1|Study_ID, 
@@ -886,7 +890,7 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
       run <- TRUE
       system.time(
         if(run){
-          Individual_Fluctuation_Model <- metafor::rma.mv(PRRD, V = Individual_Fluctuation_VCV, test = "t", dfs = "contain",
+          Individual_Fluctuation_Model <- metafor::rma.mv(PRRD_cor, V = Individual_Fluctuation_VCV, test = "t", dfs = "contain",
                                                           mods = ~ Fluctuation_Category - 1,
                                                           random = list(~1|phylo, ~1|Study_ID, ~1|obs, ~1|Scientific_Name, 
                                                                         ~1|Shared_Animal_Number, ~1|Measurement), 
@@ -933,21 +937,7 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
                                                  group_no = individual_fluctuation_group_no[,1], 
                                                  row.names = individual_fluctuation_rnames)
       individual_fluctuation_table$name <- row.names(individual_fluctuation_table)
-      
-      individual_fluctuation_raw_mean <- c(unlist(unname(Individual_Fluctuation_Data %>% filter(`Fluctuation_Category` == "Sinusoidal (Sine Curve)") %>% 
-                                                           select("InRR_Transformed"))), 
-                                           unlist(unname(Individual_Fluctuation_Data %>% filter(`Fluctuation_Category` == "Alternating") %>% 
-                                                           select("InRR_Transformed"))), 
-                                           unlist(unname(Individual_Fluctuation_Data %>% filter(`Fluctuation_Category` == "Stepwise") %>% 
-                                                           select("InRR_Transformed"))))
-      
-      individual_fluctuation_raw_name <- c(replicate(74, "Sinusoidal (Sine Curve)"), 
-                                           replicate(53, "Alternating"), 
-                                           replicate(47, "Stepwise"))
-      
-      individual_fluctuation_raw_df <- data.frame("Model" = individual_fluctuation_raw_name, 
-                                                  "Effect" = individual_fluctuation_raw_mean)
-      
+    
 #### Figure 7 ####
       # Plot the fluctuation relationship for overall data set
       Plot_Data <- data
@@ -955,8 +945,8 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
                                                             ifelse(n_T1_C > 10 & n_T1_C <= 20, "20", 
                                                                    ifelse(n_T1_C > 20 & n_T1_C <= 30, "30", "> 30"))))
       
-      Amplitude_Plot <- ggplot(Plot_Data, aes(x = Fluctuation_Magnitude, y = PRRD)) + 
-        geom_point(aes(x = Fluctuation_Magnitude, y = PRRD, 
+      Amplitude_Plot <- ggplot(Plot_Data, aes(x = Fluctuation_Magnitude, y = PRRD_cor)) + 
+        geom_point(aes(x = Fluctuation_Magnitude, y = PRRD_cor, 
                        size = fct_relevel(n_category, c("10", "20", "30", "> 30"))), 
                    shape = 21, fill = "#4292c6", alpha = 0.5, show.legend = FALSE) + 
         labs(x = "Fluctuation Amplitude (\u00B0C)", y = expression("Effect Size (PRRD"["S"]*")"), 
@@ -984,8 +974,8 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
       
       # Graph Code
       
-      Individual_Amplitude_Plot <- ggplot(Individual_Plot_Data, aes(x = Fluctuation_Magnitude, y = InRR_Transformed)) + 
-        geom_point(aes(x = Fluctuation_Magnitude, y = InRR_Transformed, 
+      Individual_Amplitude_Plot <- ggplot(Individual_Plot_Data, aes(x = Fluctuation_Magnitude, y = PRRD_cor)) + 
+        geom_point(aes(x = Fluctuation_Magnitude, y = PRRD_cor, 
                        size = fct_relevel(n_category, c("10", "20", "30", "> 30"))), 
                    shape = 21, fill = "#4292c6", alpha = 0.5, show.legend = FALSE) + 
         labs(x = "Fluctuation Amplitude (\u00B0C)", y = expression("Effect Size (PRRD"["S"]*")"), 
@@ -1015,7 +1005,7 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
       run <- TRUE
       system.time(
         if(run){
-          Individual_Taxa <- metafor::rma.mv(PRRD ~ vert_invert-1, V = Individual_VCV, test = "t", 
+          Individual_Taxa <- metafor::rma.mv(PRRD_cor ~ vert_invert-1, V = Individual_VCV, test = "t", 
                                               random = list(~1|phylo, 
                                                             ~1|Study_ID, 
                                                             ~1|obs, 
@@ -1075,11 +1065,12 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
  # Publication bias
  
  # calculate effective sample size for pub bias, Nakagawa et al. 2022 and Maccartney et al. 2022
+           data$Year_Z <- scale(data$Year)
         data$inv_n_eff <- (1/data$n_T1_C) + (1/data$n_T1_F) + (1/data$n_T2_C) + (1/data$n_T2_F)
   data$sqrt_inv_n_eff  <- sqrt(data$inv_n_eff)
   
   if(rerun){
-    Overall_PubBias <- metafor::rma.mv(PRRD ~ 1 + Year_Z + inv_n_eff, V = VCV, test = "t", 
+    Overall_PubBias_se <- metafor::rma.mv(PRRD_cor ~ 1 + Year_Z + sqrt_inv_n_eff, V = VCV, test = "t", 
                                      random = list(~1|phylo, 
                                                    ~1|Study_ID, 
                                                    ~1|obs, 
@@ -1088,12 +1079,23 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
                                                    ~1|Measurement), 
                                      R = list(phylo=A_cor), data = data, method = "REML", sparse = TRUE, 
                                      control=list(rel.tol=1e-9))
-      saveRDS(Overall_PubBias, "./output/models/Overall_PubBias")
+
+    Overall_PubBias_v <- metafor::rma.mv(PRRD_cor ~ 1 + Year_Z + inv_n_eff, V = VCV, test = "t", 
+                                     random = list(~1|phylo, 
+                                                   ~1|Study_ID, 
+                                                   ~1|obs, 
+                                                   ~1|Scientific_Name, 
+                                                   ~1|Shared_Animal_Number, 
+                                                   ~1|Measurement), 
+                                     R = list(phylo=A_cor), data = data, method = "REML", sparse = TRUE, 
+                                     control=list(rel.tol=1e-9))
+      saveRDS(Overall_PubBias_se, "./output/models/Overall_PubBias_se")
+      saveRDS(Overall_PubBias_v, "./output/models/Overall_PubBias_v")
   } else {
-    Overall_PubBias <- readRDS("./output/models/Overall_PubBias")
+    Overall_PubBias_v <- readRDS("./output/models/Overall_PubBias_v")
   }
   
-  bubble_plot(Overall_PubBias, mod = "Year_Z", group = "Study_ID", ylab = "PRRDs", xlab = "Publication Year (scaled)")
+  bubble_plot(Overall_PubBias_v, mod = "Year_Z", group = "Study_ID", ylab = "PRRDs", xlab = "Publication Year (scaled)")
   
  # Calculate influence diagnostics. Takes a long time so avoid re-running.
  rerun = FALSE
@@ -1106,30 +1108,8 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
  
  # Check if there are influential (CD => 1). Appears to be one effect that is problematic. 
     plot(inf, type = "o", ylab = "Cook's Distance", xlab = "Effect")
-    which(inf >=0.8) # row 119 appears potentially problematic. 
+    which(inf >=0.8) # No rows appear problematic. 
     
- # Refit model without this outlier, do we get different results? Answer is generally, no
-    run <- TRUE
-    system.time(
-      if(run){
-        data2 <- data[-119,]
-        VCV2 <- VCV[-119, -119]
-        
-        Overall_Model_outlier <- metafor::rma.mv(PRRD ~ 1, V = VCV2, test = "t", 
-                                         random = list(~1|phylo, 
-                                                       ~1|Study_ID, 
-                                                       ~1|obs, 
-                                                       ~1|Scientific_Name, 
-                                                       ~1|Shared_Animal_Number, 
-                                                       ~1|Measurement), 
-                                         R = list(phylo=A_cor), data = data2, method = "REML", sparse = TRUE, 
-                                         control=list(rel.tol=1e-9))
-        saveRDS(Overall_Model_outlier, "./output/models/Complex_Overall_Model_outlier.rds")
-      } else {
-        Overall_Model_outlier <- readRDS("./output/models/Complex_Overall_Model_outlier.rds")
-      })
-    
- 
  # Write tables for supp
   write.csv(Raw_Overall, file = "./output/tables/Raw_Overall.csv")
   write.csv(Raw_Trait, file = "./output/tables/Raw_Trait.csv")
