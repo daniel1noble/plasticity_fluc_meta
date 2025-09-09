@@ -1047,7 +1047,8 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
       labelled_tree$tip.label <- paste(labelled_tree$tip.label, " ", Scientific_Name_Effects$Effect_Sizes, "(", Scientific_Name_Studies$Study, ")")
       node.depth(labelled_tree, method = 2)
       plot(labelled_tree, node.color = "#183357")
-      
+      quartz.save("./output/figs/labelled_tree_plot.pdf")
+    
     # Model Results Tables
       
                      Raw_Overall <- table_results(Overall_Model, study_name = "Study_ID", species_name = "Scientific_Name")
