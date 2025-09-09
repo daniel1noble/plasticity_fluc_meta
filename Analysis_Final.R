@@ -127,7 +127,7 @@ data[data$Plasticity_Mechanism == "Developmental Plasticity", "Plasticity_Mechan
 
 # Clean up and Write the data
 data <- data %>% select(-c(direction1, direction2, meaning_negs, meaning_pos, meaning_opps, PRRD_cor1, Effect_Size_ID))
-write.csv(data, "./output/data/data_final.csv", row.names = FALSE)
+#write.csv(data, "./output/data/data_final.csv", row.names = FALSE)
 
 # summarise study, species and effects
 summary  <- data  %>% summarise(effects = n(), studies = length(unique(Study_ID)), species = length(unique(Scientific_Name)))
@@ -801,7 +801,7 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
         })
       
       # Check robustness
-      PlasticityMechanism_Model_rob <- robust(PlasticityMechanism_Model, cluster = data$Study_ID, adjust = TRUE)
+      PlasticityMechanism_Model_rob <- robust(PlasticityMechanism_Model, cluster = plasticity_mec_data$Study_ID, adjust = TRUE)
       
       # Extract effects
       PlasticityMechanism_Model_Estimates <- data.frame(estimate = PlasticityMechanism_Model$b, 
@@ -864,12 +864,19 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
                                                          ci.ub = Individual_Amplitude_Model$ci.ub)
    
 #### Individual-Level Subset Model - Type of Fluctuation Meta-Regression ####
-      Individual_Fluctuation_Data <- Individual_Subset_Data %>% filter(!is.na(Fluctuation_Category))
+      Individual_Fluctuation_Data <- Individual_Subset_Data %>% filter(!is.na(Fluctuation_Category))  %>% 
       
       Individual_Fluctuation_Exploration <- Individual_Fluctuation_Data %>% select("Fluctuation_Category") %>% table() %>% data.frame()
       rownames(Individual_Fluctuation_Exploration) <- Individual_Fluctuation_Exploration$Fluctuation_Category
       
-      Individual_Fluctuation_Data <- Individual_Fluctuation_Data %>% filter(Fluctuation_Category != "Stochastic")
+      # Fix naming of categories
+      Individual_Fluctuation_Data <- Individual_Fluctuation_Data %>% 
+                                      filter(Fluctuation_Category != "Stochastic") %>% 
+                                      mutate(Fluctuation_Category = recode(Fluctuation_Category,
+                                                                           "Sinusoidal" = "Sinusoidal (Sine Curve)", 
+                                                                           "Alternating" = "Alternating", 
+                                                                           "Stepwise" = "Stepwise"))
+
       
       Individual_Fluctuation_Species_Count <- Individual_Fluctuation_Data %>% select("Scientific_Name", "Fluctuation_Category") %>% table() %>% data.frame() %>%
         filter(`Freq` != 0) %>% select("Fluctuation_Category") %>% table() %>% data.frame()
@@ -898,8 +905,10 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
                                                           control=list(rel.tol=1e-9))
           saveRDS(Individual_Fluctuation_Model, "./output/models/Complex_Individual_Fluctuation_Model.rds")
         } else {
-          Individual_Fluctuation_Model <- readRDS("./output/models/Complex_Individual_Fluctuation_Model.rds")})
-      
+          Individual_Fluctuation_Model <- readRDS("./output/models/Complex_Individual_Fluctuation_Model.rds")
+        }
+      )
+
       Individual_Fluctuation_Model_rob <- robust(Individual_Fluctuation_Model, cluster = Individual_Fluctuation_Data$Study_ID, adjust = TRUE)
       
       Individual_Fluctuation_Model_Estimates <- data.frame(Category = substr(row.names(Individual_Fluctuation_Model$b), 21, 100),
@@ -1130,5 +1139,5 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
     colnames(het_table) <- c("I2", "CV", "M")
    row.names(het_table) <- gsub("I2_", "", row.names(het_table))
 
-    write.csv(het_table, file = "./output/tables/Complex_Heterogeneity_Overall.csv", row.names = FALSE)
+    write.csv(het_table, file = "./output/tables/Complex_Heterogeneity_Overall.csv", row.names = TRUE)
       
