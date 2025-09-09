@@ -1,4 +1,4 @@
 "","Fluctuation_Category","study","species","k","Estimate","CI Low","CI High","df","p-value"
-"1","Alternating",14,17,55,0.009,-0.003,0.021,37,0.145
-"2","Sinusoidal (Sine Curve)",20,17,105,0.002,-0.008,0.013,75,0.647
-"3","Stepwise",7,6,47,0,-0.014,0.013,75,0.966
+"1","Alternating",14,17,55,0.009,-0.003,0.02,204,0.138
+"2","Sinusoidal (Sine Curve)",20,17,105,0.002,-0.008,0.012,204,0.647
+"3","Stepwise",7,6,47,0,-0.014,0.013,204,0.966
