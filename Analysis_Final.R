@@ -897,7 +897,7 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
       run <- TRUE
       system.time(
         if(run){
-          Individual_Fluctuation_Model <- metafor::rma.mv(PRRD_cor, V = Individual_Fluctuation_VCV, test = "t", dfs = "contain",
+          Individual_Fluctuation_Model <- metafor::rma.mv(PRRD_cor, V = Individual_Fluctuation_VCV, test = "t", 
                                                           mods = ~ Fluctuation_Category - 1,
                                                           random = list(~1|phylo, ~1|Study_ID, ~1|obs, ~1|Scientific_Name, 
                                                                         ~1|Shared_Animal_Number, ~1|Measurement), 
