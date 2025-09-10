@@ -1035,7 +1035,34 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
       Individual_Taxa_Estimates <- data.frame(estimate = Individual_Taxa$b, 
                                                ci.lb = Individual_Taxa$ci.lb, 
                                                ci.ub = Individual_Taxa$ci.ub)
+
+##### Individual-Level Subset Model - Aquatic/terrestrial Meta-Regression
+      # Fit model
+      run <- TRUE
+      system.time(
+        if(run){
+          Individual_Habitat <- metafor::rma.mv(PRRD_cor ~ Ecosystem-1, V = Individual_VCV, test = "t", 
+                                              random = list(~1|phylo, 
+                                                            ~1|Study_ID, 
+                                                            ~1|obs, 
+                                                            ~1|Scientific_Name, 
+                                                            ~1|Shared_Animal_Number, 
+                                                            ~1|Measurement), 
+                                              R = list(phylo=Individual_A_cor), data = Individual_Subset_Data, method = "REML", sparse = TRUE,
+                                              control=list(rel.tol=1e-9))
+          saveRDS(Individual_Habitat, "./output/models/Complex_Individual_Habitat.rds")
+        } else {
+          Individual_Habitat <- readRDS("./output/models/Complex_Individual_Habitat.rds")
+        })
       
+      # Check robustness
+      Individual_Habitat_rob <- robust(Individual_Habitat, cluster = Individual_Subset_Data$Study_ID, adjust = TRUE)
+
+      # Extract estimates
+      Individual_Habitat_Estimates <- data.frame(estimate = Individual_Habitat$b, 
+                                                 ci.lb = Individual_Habitat$ci.lb, 
+                                                 ci.ub = Individual_Habitat$ci.ub)
+
 #### Supplementary Material Results ####
       
   # Phylogenetic Tree with labels
@@ -1071,7 +1098,8 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
         Raw_Individual_Amplitude <- table_results(Individual_Amplitude_Model,  study_name = "Study_ID", species_name = "Scientific_Name") # Note intercept and slope (row 2)
  Raw_Individual_Fluctuation_Type <- table_results(Individual_Fluctuation_Model, group = "Fluctuation_Category", study_name = "Study_ID", species_name = "Scientific_Name")
  Raw_Individual_Taxa <- table_results(Individual_Taxa, group = "vert_invert", study_name = "Study_ID", species_name = "Scientific_Name")
- 
+ Raw_Individual_Habitat <- table_results(Individual_Habitat, group = "Ecosystem", study_name = "Study_ID", species_name = "Scientific_Name")
+
  # Publication bias
  
  # calculate effective sample size for pub bias, Nakagawa et al. 2022 and Maccartney et al. 2022
@@ -1132,7 +1160,8 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
   write.csv(Raw_Individual_Fluctuation_Type, file = "./output/tables/Raw_Individual_Fluctuation_Type.csv")
   write.csv(Raw_Individual_Amplitude, file = "./output/tables/Raw_Individual_Amplitude.csv")
   write.csv(Raw_Individual_Taxa, file = "./output/tables/Raw_Individual_Taxa.csv")
-  
+  write.csv(Raw_Individual_Habitat, file = "./output/tables/Raw_Individual_Habitat.csv")
+
  # Heterogeneity Table
 
               het_table <- cbind(Overall_Model_i2,Overall_Model_CV,Overall_Model_M)
