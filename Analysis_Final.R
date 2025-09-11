@@ -126,7 +126,7 @@ data[data$Scientific_Name == "Inachis_io", "Scientific_Name"] <- "Aglais_io"
 data[data$Plasticity_Mechanism == "Developmental Plasticity", "Plasticity_Mechanism"] <- "Development"
 
 # Clean up and Write the data
-data <- data %>% select(-c(direction1, direction2, meaning_negs, meaning_pos, meaning_opps, PRRD_cor1, Effect_Size_ID))
+data <- data %>% select(-c(direction1, direction2, meaning_negs, meaning_pos, meaning_opps, PRRD_cor1))
 #write.csv(data, "./output/data/data_final.csv", row.names = FALSE)
 
 # summarise study, species and effects
