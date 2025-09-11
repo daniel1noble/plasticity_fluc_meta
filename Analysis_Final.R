@@ -1147,7 +1147,10 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
  # Check if there are influential (CD => 1). Appears to be one effect that is problematic. 
     plot(inf, type = "o", ylab = "Cook's Distance", xlab = "Effect")
     which(inf >=0.8) # No rows appear problematic. 
-    
+    mean(inf)
+    sd(inf)
+    max(inf) # pretty trivial
+
  # Write tables for supp
   write.csv(Raw_Overall, file = "./output/tables/Raw_Overall.csv")
   write.csv(Raw_Trait, file = "./output/tables/Raw_Trait.csv")
