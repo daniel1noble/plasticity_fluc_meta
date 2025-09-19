@@ -123,7 +123,28 @@ het_plot <- function(data, x, y, type, col = wes_palette('GrandBudapest1', 4, ty
 }
 
 
-#Tree checks function
+#' @title Tree checks and pruning
+#' @description Checks consistency between a dataset and a phylogenetic tree,
+#'              or prunes the tree to match the data.
+#'
+#' @param data A data frame containing species information.
+#' @param tree A phylogenetic tree object (class `phylo`).
+#' @param dataCol Column name or index in `data` that contains species names.
+#' @param type Whether to run checks ("checks") or prune the tree ("prune").
+#'
+#' @details 
+#' - "checks": returns counts of species in data vs tree, plus mismatched taxa.  
+#' - "prune": drops species from the tree that are not in the data. Will error if 
+#'            data contains species missing from the tree.
+#'
+#' @return
+#' If `type = "checks"`, returns a list with:
+#' - `SpeciesNumbers`: number of unique species in data and tree
+#' - `Species_InTree_But_NotData`: taxa found in tree but missing in data
+#' - `Species_InData_But_NotTree`: taxa found in data but missing in tree
+#' 
+#' If `type = "prune"`, returns a pruned `phylo` tree.
+#'
 tree_checks <- function(data, tree, dataCol, type = c("checks", "prune")){
   type = match.arg(type)
   # How many unique species exist in data and tree
@@ -145,6 +166,17 @@ tree_checks <- function(data, tree, dataCol, type = c("checks", "prune")){
   }
 }
 
+#' @title Arcsine-square root transformation with SD adjustment
+#' @description Applies an arcsine-square root transformation to a mean 
+#'              (e.g. proportions) and adjusts the SD using the delta method.
+#'
+#' @param mean Mean value (typically a proportion between 0 and 1).
+#' @param sd Standard deviation on the original scale.
+#'
+#' @return A list with:
+#' - `mean`: transformed mean
+#' - `sd`: transformed standard deviation
+#'
 asine_transform_with_sd <- function(mean, sd) {
   # Transform mean
   mean_t <- asin(sqrt(mean))
@@ -153,6 +185,17 @@ asine_transform_with_sd <- function(mean, sd) {
   list(mean = mean_t, sd = sd_t)
 }
 
+#' @title Back-transformed mean
+#' @description Computes back-transformed mean values for arcsine-square root 
+#'              or log-transformed data.
+#'
+#' @param m Mean value on the transformed scale.
+#' @param s Standard deviation on the transformed scale.
+#' @param per_transform Whether a proportion (arcsine) transformation was applied ("Yes"/"No").
+#' @param ln_transform Whether a log transformation was applied ("Yes"/"No").
+#'
+#' @return A numeric value of the back-transformed mean.
+#'
 back_mean <- function(m, s, per_transform = "No", ln_transform = "No") {
   ifelse(per_transform == "Yes",
          asine_transform_with_sd(mean = m, sd = s)$mean,
@@ -161,6 +204,17 @@ back_mean <- function(m, s, per_transform = "No", ln_transform = "No") {
                 m))
 }
 
+#' @title Back-transformed SD
+#' @description Computes back-transformed standard deviations for arcsine-square root 
+#'              or log-transformed data.
+#'
+#' @param m Mean value on the transformed scale.
+#' @param s Standard deviation on the transformed scale.
+#' @param per_transform Whether a proportion (arcsine) transformation was applied ("Yes"/"No").
+#' @param ln_transform Whether a log transformation was applied ("Yes"/"No").
+#'
+#' @return A numeric value of the back-transformed standard deviation.
+#'
 back_sd <- function(m, s, per_transform = "No", ln_transform = "No") {
   ifelse(per_transform == "Yes",
          asine_transform_with_sd(mean = m, sd = s)$sd,
