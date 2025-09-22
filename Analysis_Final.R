@@ -965,13 +965,11 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
         theme(axis.text.y = element_text(size = 10, colour ="black", margin = margin(l = 5))) +
         theme(axis.text.x = element_text(size = 10, colour ="black", margin = margin(b = 10))) +
         #theme(legend.position = "bottom", legend.direction = "horizontal") + 
-        geom_hline(yintercept = Overall_Model_Estimates$estimate, lty = 2) + 
-        geom_smooth(method = "lm", linewidth = 1, se = F, colour = "#084594") +
-        stat_poly_eq(formula = y ~ x, 
-                     aes(label = paste(after_stat(eq.label), after_stat(rr.label), sep = "~~~")), 
-                     parse = TRUE) +
+        #geom_hline(yintercept = Overall_Model_Estimates$estimate, lty = 2) + 
+        #geom_smooth(method = "lm", linewidth = 1, se = F, colour = "#084594") +
+        geom_abline(slope = Amplitude_Model_Estimates$estimate[2], intercept = Amplitude_Model_Estimates$estimate[1], colour = "#084594", linewidth = 1) +
         coord_cartesian(xlim = c(0, 25), 
-                        ylim = c(-0.25, 0.25))
+                        ylim = c(-0.25, 0.30))
       
       
       # Preparing Graph
@@ -994,13 +992,12 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
         theme(axis.text.y = element_text(size = 10, colour ="black", margin = margin(l = 5))) +
         theme(axis.text.x = element_text(size = 10, colour ="black", margin = margin(b = 10))) +
         #theme(legend.position = "bottom", legend.direction = "horizontal") + 
-        geom_hline(yintercept = Individual_Model_Estimates$estimate, lty = 2) + 
-        geom_smooth(method = "lm", linewidth = 1, se = F, colour = "#084594") +
-        stat_poly_eq(formula = y ~ x, 
-                     aes(label = paste(after_stat(eq.label), after_stat(rr.label), sep = "~~~")), 
-                     parse = TRUE) +
+        #geom_hline(yintercept = Individual_Model_Estimates$estimate, lty = 2) + 
+        #geom_smooth(method = "lm", linewidth = 1, se = F, colour = "#084594") +
+        geom_abline(slope = Individual_Amplitude_Model_Estimates$estimate[2], intercept = Individual_Amplitude_Model_Estimates$estimate[1], colour = "#084594", linewidth = 1) +
+    
         coord_cartesian(xlim = c(0, 25), 
-                        ylim = c(-0.25, 0.25))
+                        ylim = c(-0.25, 0.30))
 
       size = 16
       position = "topleft"
