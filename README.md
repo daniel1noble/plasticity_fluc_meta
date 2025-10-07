@@ -2,7 +2,7 @@
 
 This repository contains data and R code for the associated manuscript.  
 
-Clayton W. Stocker, Stephanie M. Bamford, Miki Jahn, Geoffrey P. F. Mazué, Amanda K. Pettersen, Daniel Ritchie, Alexander Rubin, Daniel W.A. Noble^*^, Frank Seebacher^*^. (2025) Temperature variability does not impact the capacity for phenotypic plasticity in ectotherms – a meta-analysis. Ecology Letters.
+Clayton W. Stocker, Stephanie M. Bamford, Miki Jahn, Geoffrey P. F. Mazué, Amanda K. Pettersen, Daniel Ritchie, Alexander Rubin, Daniel W.A. Noble*, Frank Seebacher*. (2025) Temperature variability does not impact the capacity for phenotypic plasticity in ectotherms – a meta-analysis. Ecology Letters.
 
 Please email frank.seebacher@sydney.edu.au or daniel.noble@anu.edu.au for any inquiries.
 
