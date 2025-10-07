@@ -1,10 +1,12 @@
 # Temperature variability has limited effects on phenotypic plasticity in ectotherms – a meta-analysis
 
+[![DOI](https://zenodo.org/badge/979073901.svg)](https://doi.org/10.5281/zenodo.17290563)
+
 This repository contains data and R code for the associated manuscript.  
 
 Clayton W. Stocker, Stephanie M. Bamford, Miki Jahn, Geoffrey P. F. Mazué, Amanda K. Pettersen, Daniel Ritchie, Alexander Rubin, Daniel W.A. Noble*, Frank Seebacher*. (2025) Temperature variability has limited effects on phenotypic plasticity in ectotherms – a meta-analysis. Ecology Letters.
 
-Please email frank.seebacher@sydney.edu.au or daniel.noble@anu.edu.au for any inquiries.
+Please email frank.seebacher@sydney.edu.au or daniel.noble@anu.edu.au for any inquiries. A release is also lodged on [Zenodo](https://doi.org/10.5281/zenodo.17290563)
 
 ## How to use this repository?
 
