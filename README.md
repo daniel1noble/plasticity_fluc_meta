@@ -1,28 +1,30 @@
-# Temperature variability does not impact the capacity for phenotypic plasticity in ectotherms – a meta-analysis
+# Temperature variability has limited effects on phenotypic plasticity in ectotherms – a meta-analysis
 
 This repository contains data and R code for the associated manuscript.  
 
-Clayton W. Stocker, Stephanie M. Bamford, Miki Jahn, Geoffrey P. F. Mazué, Amanda K. Pettersen, Daniel Ritchie, Alexander Rubin, Daniel W.A. Noble*, Frank Seebacher*. (2025) Temperature variability does not impact the capacity for phenotypic plasticity in ectotherms – a meta-analysis. Ecology Letters.
+Clayton W. Stocker, Stephanie M. Bamford, Miki Jahn, Geoffrey P. F. Mazué, Amanda K. Pettersen, Daniel Ritchie, Alexander Rubin, Daniel W.A. Noble*, Frank Seebacher*. (2025) Temperature variability has limited effects on phenotypic plasticity in ectotherms – a meta-analysis. Ecology Letters.
 
 Please email frank.seebacher@sydney.edu.au or daniel.noble@anu.edu.au for any inquiries.
 
-## How to use this respository?
+## How to use this repository?
 
 1. Clone or download the repository to your local machine.
-2. Open the `Analysis_Final.R` script in RStudio or your preferred R environment.
+2. Open the `Plasticity_Fluctuation_Meta.Rproj` file which will open RStudio and set your working directory.
 3. Ensure you have all the required R packages installed (see Software Dependencies section below).
-4. Run the `Analysis_Final.R` script to reproduce the analyses and figures from the manuscript.
+4. Run through the `Analysis_Final.R` script to reproduce the analyses and figures from the manuscript. Note that you do not need to re-run the entire analysis if you use the saved model objects in the `output/models/` directory. But, you need to set `rerun` = FALSE in the `Analysis_Final.R` script to use the saved models.
 
 There are additional scripts and resources in this repository that are important and are detailed below:
 
 - `Complexity_Final_data.csv`: This is the final processed dataset used for the meta-analysis.
+- `complexity_tree.nwk`: This file contains the phylogenetic tree used in the analysis.
+- `func.R`: This script contains custom functions used in the analysis.
 - `output/figs/`: This directory contains all figures generated from the analysis.
 - `output/tables/`: This directory contains all tables generated from the analysis.
 - `output/models/`: This directory contains saved model objects from the analysis. Use these so you don't have to re-run the entire analysis.
 
 ## Analyses
 
-All code for analyses reproducing the results and figures is found in `Analysis_Final.R` script. The code also generates supplementary tables and results.
+All code for analyses reproducing the results and figures is found in `Analysis_Final.R` script. The code also generates supplementary tables and results, which are saved to the `output/` directory.
 
 ## Data
 The data is the `Complex_Final_Data.csv` file. This file contains the data used in the meta-analysis. The meta-data that describes the columns are as follows. Note that some columns are created during the analysis (e.g., transformed means and SDs, effect sizes).
