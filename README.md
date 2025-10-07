@@ -2,9 +2,23 @@
 
 This repository contains data and R code for the associated manuscript.  
 
-Clayton W. Stocker, Stephanie M. Bamford, Miki Jahn, Geoffrey P. F. Mazué, Amanda K. Pettersen, Daniel Ritchie, Alexander Rubin, Daniel W.A. Noble, Frank Seebacher. (2025) Temperature variability does not impact the capacity for phenotypic plasticity in ectotherms – a meta-analysis.
+Clayton W. Stocker, Stephanie M. Bamford, Miki Jahn, Geoffrey P. F. Mazué, Amanda K. Pettersen, Daniel Ritchie, Alexander Rubin, Daniel W.A. Noble^*, Frank Seebacher^*. (2025) Temperature variability does not impact the capacity for phenotypic plasticity in ectotherms – a meta-analysis. Ecology Letters.
 
-Please email clayton.stocker@sydney.edu.au for any inquiries. 
+Please email frank.seebacher@sydney.edu.au or daniel.noble@anu.edu.au for any inquiries.
+
+## How to use this respository?
+
+1. Clone or download the repository to your local machine.
+2. Open the `Analysis_Final.R` script in RStudio or your preferred R environment.
+3. Ensure you have all the required R packages installed (see Software Dependencies section below).
+4. Run the `Analysis_Final.R` script to reproduce the analyses and figures from the manuscript.
+
+There are additional scripts and resources in this repository that are important and are detailed below:
+
+- `Complexity_Final_data.csv`: This is the final processed dataset used for the meta-analysis.
+- `output/figs/`: This directory contains all figures generated from the analysis.
+- `output/tables/`: This directory contains all tables generated from the analysis.
+- `output/models/`: This directory contains saved model objects from the analysis. Use these so you don't have to re-run the entire analysis.
 
 ## Analyses
 
@@ -91,3 +105,81 @@ The data is the `Complex_Final_Data.csv` file. This file contains the data used 
 | Year_Z                             | Z-transformed year of publication. |
 | inv_n_eff                          | Inverse of the effective sample size (publication bias metric). |
 | sqrt_inv_n_eff                     | Square root of inverse effective sample size (publication bias metric). |
+
+## Software Dependencies
+
+R version 4.5.1 (2025-06-13)
+Platform: aarch64-apple-darwin20
+Running under: macOS Tahoe 26.0.1
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/lib/libRblas.0.dylib 
+LAPACK: /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.1
+
+locale:
+[1] C.UTF-8/C.UTF-8/C.UTF-8/C/C.UTF-8/C.UTF-8
+
+time zone: Australia/Sydney
+tzcode source: internal
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] rphylopic_1.5.0     janitor_2.2.1       gridExtra_2.3      
+ [4] ggbeeswarm_0.7.2    ggridges_0.5.6      ggpmisc_0.6.2      
+ [7] ggpp_0.5.9          robumeta_2.1        orchaRd_2.0        
+[10] metaAidR_0.0.0.9000 MCMCglmm_2.36       coda_0.19-4.1      
+[13] phytools_2.4-4      maps_3.4.3          flextable_0.9.9    
+[16] brms_2.22.0         Rcpp_1.0.14         metafor_4.8-0      
+[19] numDeriv_2016.8-1.1 metadat_1.4-0       Matrix_1.7-3       
+[22] latex2exp_0.9.6     patchwork_1.3.1     emmeans_1.11.1     
+[25] ape_5.8-1           DescTools_0.99.60   rotl_3.1.0         
+[28] gtsummary_2.3.0     readxl_1.4.5        lubridate_1.9.4    
+[31] forcats_1.0.0       stringr_1.5.1       dplyr_1.1.4        
+[34] purrr_1.0.4         readr_2.1.5         tidyr_1.3.1        
+[37] tibble_3.3.0        ggplot2_3.5.2       tidyverse_2.0.0    
+
+loaded via a namespace (and not attached):
+  [1] cubature_2.1.4          splines_4.5.1           cellranger_1.1.0       
+  [4] XML_3.99-0.18           lifecycle_1.0.4         doParallel_1.0.17      
+  [7] lattice_0.22-7          MASS_7.3-65             backports_1.5.0        
+ [10] magrittr_2.0.3          rmarkdown_2.29          grImport2_0.3-3        
+ [13] zip_2.3.3               askpass_1.2.1           gld_2.6.7              
+ [16] pbapply_1.7-2           RColorBrewer_1.1-3      multcomp_1.4-28        
+ [19] abind_1.4-8             expm_1.0-0              quadprog_1.5-8         
+ [22] TH.data_1.1-3           tensorA_0.36.2.1        sandwich_3.1-1         
+ [25] gdtools_0.4.2           rentrez_1.2.4           MatrixModels_0.5-4     
+ [28] bridgesampling_1.1-2    codetools_0.2-20        xml2_1.3.8             
+ [31] tidyselect_1.2.1        bayesplot_1.13.0        farver_2.1.2           
+ [34] matrixStats_1.5.0       base64enc_0.1-3         mathjaxr_1.8-0         
+ [37] jsonlite_2.0.0          e1071_1.7-16            survival_3.8-3         
+ [40] iterators_1.0.14        systemfonts_1.2.3       foreach_1.5.2          
+ [43] tools_4.5.1             progress_1.2.3          ragg_1.4.0             
+ [46] glue_1.8.0              mnormt_2.1.1            xfun_0.52              
+ [49] distributional_0.5.0    loo_2.8.0               withr_3.0.2            
+ [52] combinat_0.0-8          fastmap_1.2.0           boot_1.3-31            
+ [55] SparseM_1.84-2          openssl_2.3.3           digest_0.6.37          
+ [58] timechange_0.3.0        R6_2.6.1                estimability_1.5.1     
+ [61] colorspace_2.1-1        textshaping_1.0.1       rsvg_2.6.2             
+ [64] jpeg_0.1-11             generics_0.1.4          fontLiberation_0.1.0   
+ [67] data.table_1.17.6       corpcor_1.6.10          class_7.3-23           
+ [70] clusterGeneration_1.3.8 prettyunits_1.2.0       httr_1.4.7             
+ [73] scatterplot3d_0.3-44    pkgconfig_2.0.3         gtable_0.3.6           
+ [76] Exact_3.3               htmltools_0.5.8.1       fontBitstreamVera_0.1.1
+ [79] scales_1.4.0            lmom_3.2                png_0.1-8              
+ [82] posterior_1.6.1         snakecase_0.11.1        knitr_1.50             
+ [85] rstudioapi_0.17.1       tzdb_0.5.0              rncl_0.8.7             
+ [88] uuid_1.2-1              checkmate_2.3.2         nlme_3.1-168           
+ [91] curl_6.4.0              proxy_0.4-27            zoo_1.8-14             
+ [94] DEoptim_2.2-8           rootSolve_1.8.2.4       parallel_4.5.1         
+ [97] vipor_0.4.7             pillar_1.10.2           grid_4.5.1             
+[100] vctrs_0.6.5             xtable_1.8-4            beeswarm_0.4.0         
+[103] evaluate_1.0.4          mvtnorm_1.3-3           cli_3.6.5              
+[106] compiler_4.5.1          rlang_1.1.6             crayon_1.5.3           
+[109] rstantools_2.4.0        fs_1.6.6                stringi_1.8.7          
+[112] optimParallel_1.0-2     Brobdingnag_1.2-9       pacman_0.5.1           
+[115] quantreg_6.1            fontquiver_0.2.1        hms_1.1.3              
+[118] haven_2.5.5             igraph_2.1.4            RcppParallel_5.1.10    
+[121] phangorn_2.12.1         fastmatch_1.1-6         officer_0.6.10         
+[124] polynom_1.4-1     
