@@ -248,7 +248,7 @@ indivdual_orchard_overall <- orchard_plot(Individual_Model, group = "Study_ID", 
 fig2 <- (density_orchard_overall + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic"))) / (indivdual_orchard_overall + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic"))) + plot_annotation(tag_levels = "a", tag_suffix = ")")
 
 ggsave(filename = "./output/figs/fig2.png", plot = fig2, width = 6.7625, height =  10.4375)
-
+ggsave(filename = "./output/figs/fig2.pdf", plot = fig2, width = 6.7625, height =  10.4375)
 #### Overall Model - Trait Meta-Regression ####
         
 # Have a look at the data
@@ -483,6 +483,7 @@ position = "topleft"
 fig3 <- (density_trait_orchard + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic"))) / (density_specific_trait_orchard + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic"))) + plot_annotation(tag_levels = "a", tag_suffix = ")") 
         
 ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
+ggsave(filename = "./output/figs/fig3.pdf", plot = fig3, width = 8, height =  13)
         
 #### Overall Model - Invertebrate/Vertebrate Meta-Regression ####
         
@@ -616,6 +617,7 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
         fig4 <- (density_habitat_orchard + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic"))) / (density_vert_invert_orchard + theme(plot.tag.position = position, plot.tag = element_text(size = size, face = "italic"))) + plot_annotation(tag_levels = "a", tag_suffix = ")")
 
         ggsave(filename = "./output/figs/fig4.png", fig4, width =8.7375, height =  12.8875)
+        ggsave(filename = "./output/figs/fig4.pdf", plot = fig4, width =8.7375, height =  12.8875)
         
         
         
@@ -765,6 +767,7 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
                  x = c(1,2,3)+0.25, y = -0.1, size = 6) + geom_hline(yintercept =  c(-0.2, -0.1, 0.1, 0.2), linetype = "dashed", colour = "gray80") +  scale_colour_manual(values = c("black", "black", "black"))
       
       ggsave(filename = "./output/figs/fig5.png", density_fluctuation_orchard, width = 8.185185, height =  6.975309)
+      ggsave(filename = "./output/figs/fig5.pdf", plot = density_fluctuation_orchard, width = 8.185185, height =  6.975309)
       
 ##--------------------------------------------##      
 
@@ -836,6 +839,7 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
         geom_hline(yintercept =  c(-0.2, -0.1, 0.1, 0.2), linetype = "dashed", colour = "gray80") + scale_x_discrete(labels = c("Developmental Plasticity" = "Development")) + scale_colour_manual(values = c("black", "black", "black")) + scale_fill_manual(values=c("#453781FF", "#287D8EFF"))
       
       ggsave(filename = "./output/figs/fig6.png", density_plasticiyMechanism_orchard, width = 7, height =  5)
+      ggsave(filename = "./output/figs/fig6.pdf", plot = density_plasticiyMechanism_orchard, width = 7, height =  5)
 
 #### Individual-Level Subset Model - Fluctuation Amplitude Meta-Regression ####
       run <- TRUE
@@ -864,7 +868,7 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
                                                          ci.ub = Individual_Amplitude_Model$ci.ub)
    
 #### Individual-Level Subset Model - Type of Fluctuation Meta-Regression ####
-      Individual_Fluctuation_Data <- Individual_Subset_Data %>% filter(!is.na(Fluctuation_Category))  %>% 
+      Individual_Fluctuation_Data <- Individual_Subset_Data %>% filter(!is.na(Fluctuation_Category)) 
       
       Individual_Fluctuation_Exploration <- Individual_Fluctuation_Data %>% select("Fluctuation_Category") %>% table() %>% data.frame()
       rownames(Individual_Fluctuation_Exploration) <- Individual_Fluctuation_Exploration$Fluctuation_Category
@@ -1005,6 +1009,7 @@ ggsave(filename = "./output/figs/fig3.png", fig3, width = 8, height =  13)
       
       fig7 <- (Amplitude_Plot + t() | Individual_Amplitude_Plot + t()) + plot_annotation(tag_levels = "a", tag_suffix = ")")
       ggsave(fig7, filename= "./output/figs/fig7.png", height = 5, width = 10)
+      ggsave(fig7, filename= "./output/figs/fig7.pdf", height = 5, width = 10)
       
 ##### Individual-Level Subset Model - Invertebrate/Vertebrate Meta-Regression
       # Fit model
